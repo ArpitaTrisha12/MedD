@@ -1,0 +1,872 @@
+
+/* =================================
+   MAIN HOME
+================================= */
+
+.home {
+  width: 100%;
+}
+
+/* =================================
+   HERO SECTION
+================================= */
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(120deg, #56b4e9 0%, #2679c9 100%);
+  border-radius: 12px;
+  padding: 40px 50px;
+  min-height: 400px;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hero-left {
+  flex: 1;
+  color: white;
+}
+
+.hero-left h1 {
+  font-size: 48px;
+  line-height: 1.2;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.hero-description {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.hero-description img {
+  width: 100px;
+}
+
+.hero-description p {
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 350px;
+}
+
+.hero-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  color: #1e3fae;
+  border: 2px solid white;
+  padding: 13px 22px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.hero-button:hover {
+  background: #1e3fae;
+  color: white;
+  border-color: #1e3fae;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.hero-button img {
+  width: 18px;
+}
+
+.hero-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-self: flex-end;
+}
+
+.hero-right img {
+  width: 100%;
+  max-width: 450px;
+  display: block;
+}
+
+/* =================================
+   SPECIALITY SECTION
+================================= */
+
+.speciality {
+  text-align: center;
+  padding: 70px 0 55px;
+}
+
+/* Same heading design as Share Your Experience */
+
+.speciality h2 {
+  display: inline-block;
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 15px;
+
+  background: linear-gradient(
+    90deg,
+    #0047AB 0%,
+    #00C6FF 50%,
+    #7B2FF7 100%
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.speciality > p {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 35px;
+}
+
+.speciality-list {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 35px;
+  flex-wrap: wrap;
+}
+
+.speciality-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 125px;
+}
+
+.speciality-item img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #eaefff;
+  transition: box-shadow 0.3s;
+  animation: specialityFloat 2.5s ease-in-out infinite;
+}
+
+.speciality-item:nth-child(2) img {
+  animation-delay: 0.3s;
+}
+
+.speciality-item:nth-child(3) img {
+  animation-delay: 0.6s;
+}
+
+.speciality-item:nth-child(4) img {
+  animation-delay: 0.9s;
+}
+
+.speciality-item:nth-child(5) img {
+  animation-delay: 1.2s;
+}
+
+.speciality-item:nth-child(6) img {
+  animation-delay: 1.5s;
+}
+
+@keyframes specialityFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+.speciality-item p {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  text-align: center;
+}
+
+.speciality-item:hover {
+  transform: translateY(-5px);
+}
+
+.speciality-item:hover img {
+  box-shadow: 0 5px 18px rgba(95, 111, 255, 0.25);
+}
+
+/* =================================
+   SECTION HEADINGS
+================================= */
+
+.section-heading {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.section-heading h2 {
+  display: inline-block;
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 8px;
+
+  background: linear-gradient(
+    90deg,
+    #0047AB 0%,
+    #00C6FF 50%,
+    #7B2FF7 100%
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.section-heading p {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+/* Speciality Gradient Heading */
+
+.speciality-heading {
+  display: inline-block;
+  font-size: 36px;
+  font-weight: 800;
+
+  background: linear-gradient(
+    90deg,
+    #0047AB 0%,
+    #00C6FF 50%,
+    #7B2FF7 100%
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* =================================
+   TOP DOCTORS
+================================= */
+
+.top-doctors {
+  padding: 45px 0 65px;
+  text-align: center;
+}
+
+.top-doctors-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.top-doctor-card {
+  border: 1px solid #d6dce8;
+  border-radius: 13px;
+  overflow: hidden;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.3s ease;
+  background: white;
+}
+
+.top-doctor-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 10px 25px rgba(40, 75, 130, 0.13);
+}
+
+.top-doctor-image {
+  width: 100%;
+  height: 235px;
+  object-fit: cover;
+  object-position: top;
+  background: #eaf0ff;
+  display: block;
+}
+
+.top-doctor-info {
+  padding: 15px 17px 18px;
+}
+
+.doctor-status {
+  color: #16a36a;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.doctor-status span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #16a36a;
+}
+
+.top-doctor-info h3 {
+  color: #202938;
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+
+.doctor-speciality,
+.doctor-division {
+  color: #606775;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/* More Doctors Button */
+
+.more-doctors-button {
+  margin-top: 35px;
+  padding: 12px 35px;
+  border: none;
+  border-radius: 30px;
+  background: #eef1ff;
+  color: #263eaf;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.more-doctors-button:hover {
+  background: #5f6fff;
+  color: white;
+  transform: translateY(-3px);
+}
+
+/* =================================
+   DOCTOR IMAGE + PATIENT REVIEW
+================================= */
+
+.appointment-review-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 65px;
+
+  width: 100%;
+  max-width: 1150px;
+
+  margin: 55px auto 75px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Doctor Image */
+
+.review-doctor-image {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.review-doctor-image img {
+  width: 100%;
+  max-width: 420px;
+  height: 450px;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Patient Review */
+
+.patient-review {
+  flex: 1;
+  width: 100%;
+  max-width: 500px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.patient-review .section-heading {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.patient-review .section-heading h2 {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.patient-review .section-heading p {
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+/* =================================
+   REVIEW FORM
+================================= */
+
+.review-form {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 28px 25px;
+
+  border: 1px solid #e0e5ef;
+  border-radius: 15px;
+  background: #fff;
+
+  box-shadow: 0 8px 30px rgba(30, 63, 174, 0.07);
+  box-sizing: border-box;
+}
+
+.review-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 22px;
+}
+
+.review-field label {
+  color: #263247;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.review-field input,
+.review-field textarea {
+  width: 100%;
+  padding: 13px 15px;
+
+  border: 1px solid #d8deea;
+  border-radius: 8px;
+
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: #333;
+
+  box-sizing: border-box;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.review-field input:focus,
+.review-field textarea:focus {
+  border-color: #5f6fff;
+  box-shadow: 0 0 0 3px rgba(95, 111, 255, 0.1);
+}
+
+.review-field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Star Rating */
+
+.rating-select {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.star {
+  border: none;
+  background: transparent;
+  color: #cbd0da;
+  font-size: 29px;
+  cursor: pointer;
+  padding: 0;
+  transition: 0.2s;
+}
+
+.star.active {
+  color: #f5ae28;
+}
+
+.star:hover {
+  transform: scale(1.15);
+}
+
+.rating-select span {
+  color: #687386;
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+/* Review Submit Button */
+
+.review-submit {
+  width: 100%;
+  padding: 14px;
+
+  border: none;
+  border-radius: 30px;
+
+  background: #5268ed;
+  color: white;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.review-submit:hover {
+  background: #3549c5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(53, 73, 197, 0.2);
+}
+
+.review-note {
+  color: #7b8494;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 13px;
+}
+
+/* =================================
+   FOOTER
+================================= */
+
+.home-footer {
+  width: 100%;
+  padding-top: 55px;
+  border-top: 1px solid #e2e5eb;
+}
+
+.footer-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.3fr;
+  gap: 55px;
+  padding: 0 0 45px;
+}
+
+.footer-about img {
+  width: 150px;
+  max-height: 65px;
+  object-fit: contain;
+  object-position: left;
+  margin-bottom: 18px;
+}
+
+.footer-about p {
+  max-width: 430px;
+  color: #626b7b;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.footer-links,
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.footer-links h3,
+.footer-contact h3 {
+  color: #1f2937;
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+
+.footer-links button {
+  width: fit-content;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #626b7b;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.footer-links button:hover {
+  color: #4056d8;
+}
+
+.footer-contact p {
+  color: #626b7b;
+  font-size: 14px;
+}
+
+.footer-bottom {
+  padding: 20px 0;
+  border-top: 1px solid #e2e5eb;
+  text-align: center;
+}
+
+.footer-bottom p {
+  color: #697386;
+  font-size: 13px;
+}
+
+/* =================================
+   RESPONSIVE - TABLET
+================================= */
+
+@media (max-width: 1100px) {
+
+  .top-doctors-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .top-doctor-image {
+    height: 220px;
+  }
+
+  .hero-left h1 {
+    font-size: 40px;
+  }
+
+  .appointment-review-layout {
+    gap: 35px;
+  }
+
+}
+
+/* =================================
+   RESPONSIVE - MOBILE
+================================= */
+
+@media (max-width: 768px) {
+
+  /* Hero */
+
+  .hero {
+    flex-direction: column;
+    padding: 30px 20px 0;
+    text-align: center;
+  }
+
+  .hero-left h1 {
+    font-size: 30px;
+  }
+
+  .hero-description {
+    justify-content: center;
+  }
+
+  .hero-description p {
+    text-align: left;
+  }
+
+  .hero-button {
+    margin: 0 auto;
+  }
+
+  .hero-right {
+    justify-content: center;
+    margin-top: 25px;
+  }
+
+  .hero-right img {
+    max-width: 320px;
+  }
+
+  /* Speciality */
+
+  .speciality {
+    padding: 45px 0;
+  }
+
+  .speciality-list {
+    gap: 25px;
+  }
+
+  .speciality-item {
+    width: 100px;
+  }
+
+  .speciality-item img {
+    width: 85px;
+    height: 85px;
+  }
+
+  .section-heading h2,
+  .speciality h2 {
+    font-size: 26px;
+  }
+
+  /* Top Doctors */
+
+  .top-doctors-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .top-doctor-image {
+    height: 190px;
+  }
+
+  .top-doctor-info {
+    padding: 12px;
+  }
+
+  .top-doctor-info h3 {
+    font-size: 15px;
+  }
+
+  /* Doctor Image + Review */
+
+  .appointment-review-layout {
+    flex-direction: column;
+    gap: 20px;
+    margin: 35px auto 55px;
+    padding: 15px;
+  }
+
+  .review-doctor-image img {
+    max-width: 300px;
+    height: 300px;
+  }
+
+  .appointment-review-layout .patient-review {
+    max-width: 100%;
+  }
+
+  .appointment-review-layout .section-heading h2 {
+    font-size: 28px;
+  }
+
+  .appointment-review-layout .review-form {
+    max-width: 100%;
+  }
+
+  /* Review Form */
+
+  .review-input-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .review-form {
+    padding: 22px 18px;
+  }
+
+  /* Footer */
+
+  .footer-main {
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  .footer-about {
+    grid-column: 1 / -1;
+  }
+
+}
+
+/* =================================
+   RESPONSIVE - SMALL MOBILE
+================================= */
+
+@media (max-width: 480px) {
+
+  .hero-left h1 {
+    font-size: 26px;
+  }
+
+  .top-doctors-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .top-doctor-image {
+    height: 155px;
+  }
+
+  .top-doctor-info h3 {
+    font-size: 13px;
+  }
+
+  .doctor-speciality,
+  .doctor-division {
+    font-size: 12px;
+  }
+
+  .appointment-review-layout {
+    padding: 15px;
+  }
+
+  .review-doctor-image img {
+    max-width: 250px;
+    height: 250px;
+  }
+
+  .appointment-review-layout .section-heading h2 {
+    font-size: 25px;
+  }
+
+  .appointment-review-layout .review-form {
+    padding: 22px 16px;
+  }
+
+  .footer-main {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-about {
+    grid-column: auto;
+  }
+
+}
+
+/* =================================
+   ACCESSIBILITY
+================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .speciality-item img {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+}
+
+/* =================================
+   REVIEW SECTION BACKGROUND
+================================= */
+
+.appointment-review-layout {
+  flex-direction: row-reverse;
+  background: linear-gradient(135deg, #eaf4ff, #f5faff);
+  border-radius: 24px;
+  padding: 45px;
+  box-sizing: border-box;
+  box-shadow: 0 8px 30px rgba(40, 120, 208, 0.08);
+}
+
+/* Mobile Layout */
+
+@media (max-width: 768px) {
+  .appointment-review-layout {
+    flex-direction: column;
+    padding: 25px 18px;
+  }
+}
