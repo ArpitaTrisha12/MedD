@@ -1,13 +1,15 @@
 
-import React, { useState } from 'react'
-import { assets, specialityData, doctors } from '../assets/assets'
+import { useState } from 'react'
+import { assets, doctorImages, specialityData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
+import useDoctors from '../hooks/useDoctors'
 import './Home.css'
 
 const REVIEW_EMAIL = 'your-email@example.com' // এখানে তোমার Email বসাবে
 
 const Home = () => {
   const navigate = useNavigate()
+  const { doctors, isLoading, error } = useDoctors()
 
   const [review, setReview] = useState({
     name: '',
@@ -112,7 +114,11 @@ ${review.message}`
         </div>
 
         <div className="top-doctors-grid">
-          {doctors.slice(0, 5).map((doctor) => (
+          {isLoading && <p>Loading doctors...</p>}
+
+          {error && <p role="alert">{error}</p>}
+
+          {!isLoading && !error && doctors.slice(0, 5).map((doctor) => (
             <div
               className="top-doctor-card"
               key={doctor._id}
@@ -122,7 +128,7 @@ ${review.message}`
             >
               <img
                 className="top-doctor-image"
-                src={doctor.image}
+                src={doctorImages[doctor.image] || doctor.image}
                 alt={doctor.name}
               />
 

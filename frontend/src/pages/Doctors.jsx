@@ -1,6 +1,6 @@
-import React from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { doctors, specialityData } from '../assets/assets'
+import { doctorImages, specialityData } from '../assets/assets'
+import useDoctors from '../hooks/useDoctors'
 import './Doctors.css'
 
 const divisions = [
@@ -18,6 +18,7 @@ const divisions = [
 const Doctors = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { doctors, isLoading, error } = useDoctors()
 
   const selectedSpeciality = searchParams.get('speciality') || ''
   const selectedDivision =
@@ -136,11 +137,22 @@ const Doctors = () => {
           {/* Doctor Cards */}
           <div className="doctors-grid">
 
-            {filteredDoctors.map((doctor) => (
+            {isLoading && (
+              <p className="no-doctors">Loading doctors...</p>
+            )}
+
+            {error && (
+              <p className="no-doctors" role="alert">{error}</p>
+            )}
+
+            {!isLoading && !error && filteredDoctors.map((doctor) => (
               <div className="doctor-card" key={doctor._id}>
 
                 <div className="doctor-image">
-                  <img src={doctor.image} alt={doctor.name} />
+                  <img
+                    src={doctorImages[doctor.image] || doctor.image}
+                    alt={doctor.name}
+                  />
                 </div>
 
                 <div className="doctor-info">
@@ -170,7 +182,7 @@ const Doctors = () => {
               </div>
             ))}
 
-            {filteredDoctors.length === 0 && (
+            {!isLoading && !error && filteredDoctors.length === 0 && (
               <p className="no-doctors">
                 No doctors found in this division or speciality.
               </p>

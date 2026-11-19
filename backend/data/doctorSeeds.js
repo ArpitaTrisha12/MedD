@@ -1,321 +1,199 @@
-
-import appointment_img from './appointment_img.png'
-import header_img from './header_img.png'
-import group_profiles from './group_profiles.png'
-import profile_pic from './profile_pic.jpeg'
-import contact_image from './contact_image.png'
-import about_image from './about_image.png'
-import logo from './logo.jpeg'
-
-import dropdown_icon from './dropdown_icon.svg'
-import menu_icon from './menu_icon.svg'
-import cross_icon from './cross_icon.png'
-import chats_icon from './chats_icon.svg'
-import verified_icon from './verified_icon.svg'
-import arrow_icon from './arrow_icon.svg'
-import info_icon from './info_icon.svg'
-import upload_icon from './upload_icon.png'
-import stripe_logo from './stripe_logo.png'
-import razorpay_logo from './razorpay_logo.png'
-
-import doc1 from './doc1.png'
-import doc2 from './doc2.png'
-import doc3 from './doc3.png'
-import doc4 from './doc4.png'
-import doc5 from './doc5.png'
-import doc6 from './doc6.png'
-import doc7 from './doc7.png'
-import doc8 from './doc8.png'
-import doc9 from './doc9.png'
-import doc10 from './doc10.png'
-import doc11 from './doc11.png'
-import doc12 from './doc12.png'
-import doc13 from './doc13.png'
-import doc14 from './doc14.png'
-import doc15 from './doc15.png'
-
-// Speciality PNG Images
-import Dermatologist from './Dermatologist.png'
-import Gastroenterologist from './Gastroenterologist.png'
-import General_physician from './General_physician.png'
-import Gynecologist from './Gynecologist.png'
-import Neurologist from './Neurologist.png'
-import Pediatricians from './Pediatricians.png'
-
-// All Assets
-export const assets = {
-  appointment_img,
-  header_img,
-  group_profiles,
-  logo,
-  chats_icon,
-  verified_icon,
-  info_icon,
-  profile_pic,
-  arrow_icon,
-  contact_image,
-  about_image,
-  menu_icon,
-  cross_icon,
-  dropdown_icon,
-  upload_icon,
-  stripe_logo,
-  razorpay_logo
-}
-
-// Speciality Data
-export const specialityData = [
-  {
-    speciality: 'General physician',
-    image: General_physician
-  },
-  {
-    speciality: 'Gynecologist',
-    image: Gynecologist
-  },
-  {
-    speciality: 'Dermatologist',
-    image: Dermatologist
-  },
-  {
-    speciality: 'Pediatricians',
-    image: Pediatricians
-  },
-  {
-    speciality: 'Neurologist',
-    image: Neurologist
-  },
-  {
-    speciality: 'Gastroenterologist',
-    image: Gastroenterologist
-  }
-]
-
-// Doctor Data
-export const doctors = [
+const doctorSeeds = [
   {
     _id: 'doc1',
+    order: 1,
     name: 'Dr. Md. Rahim Uddin',
-    image: doc1,
+    image: '/src/assets/doc1.png',
     speciality: 'General physician',
     degree: 'MBBS',
     experience: '4 Years',
     division: 'Dhaka',
     about: 'Dr. Rahim Uddin is dedicated to providing quality medical care, focusing on preventive medicine, early diagnosis, and effective treatment.',
     fees: 50,
-    address: {
-      line1: 'Dhanmondi',
-      line2: 'Dhaka, Bangladesh'
-    }
+    address: { line1: 'Dhanmondi', line2: 'Dhaka, Bangladesh' },
   },
   {
     _id: 'doc2',
+    order: 2,
     name: 'Dr. Nusrat Jahan',
-    image: doc2,
+    image: '/src/assets/doc2.png',
     speciality: 'Gynecologist',
     degree: 'MBBS',
     experience: '3 Years',
     division: 'Sylhet',
     about: 'Dr. Nusrat Jahan is committed to providing compassionate healthcare for women, focusing on reproductive health and maternal care.',
     fees: 60,
-    address: {
-      line1: 'Zindabazar',
-      line2: 'Sylhet, Bangladesh'
-    }
+    address: { line1: 'Zindabazar', line2: 'Sylhet, Bangladesh' },
   },
   {
     _id: 'doc3',
+    order: 3,
     name: 'Dr. Farhan Ahmed',
-    image: doc3,
+    image: '/src/assets/doc3.png',
     speciality: 'Dermatologist',
     degree: 'MBBS',
     experience: '1 Years',
     division: 'Chattogram',
     about: 'Dr. Farhan Ahmed focuses on skin health, proper diagnosis, and personalized dermatological treatment.',
     fees: 30,
-    address: {
-      line1: 'GEC Circle',
-      line2: 'Chattogram, Bangladesh'
-    }
+    address: { line1: 'GEC Circle', line2: 'Chattogram, Bangladesh' },
   },
   {
     _id: 'doc4',
+    order: 4,
     name: 'Dr. Mohammad Hasan',
-    image: doc4,
+    image: '/src/assets/doc4.png',
     speciality: 'Pediatricians',
     degree: 'MBBS',
     experience: '2 Years',
     division: 'Rajshahi',
     about: 'Dr. Mohammad Hasan is passionate about child healthcare, growth monitoring, disease prevention, and pediatric treatment.',
     fees: 40,
-    address: {
-      line1: 'Shaheb Bazar',
-      line2: 'Rajshahi, Bangladesh'
-    }
+    address: { line1: 'Shaheb Bazar', line2: 'Rajshahi, Bangladesh' },
   },
   {
     _id: 'doc5',
+    order: 5,
     name: 'Dr. Sadia Islam',
-    image: doc5,
+    image: '/src/assets/doc5.png',
     speciality: 'Neurologist',
     degree: 'MBBS',
     experience: '4 Years',
     division: 'Khulna',
     about: 'Dr. Sadia Islam is dedicated to neurological healthcare, focusing on accurate diagnosis and effective treatment.',
     fees: 50,
-    address: {
-      line1: 'Sonadanga',
-      line2: 'Khulna, Bangladesh'
-    }
+    address: { line1: 'Sonadanga', line2: 'Khulna, Bangladesh' },
   },
   {
     _id: 'doc6',
+    order: 6,
     name: 'Dr. Arif Hossain',
-    image: doc6,
+    image: '/src/assets/doc6.png',
     speciality: 'Neurologist',
     degree: 'MBBS',
     experience: '4 Years',
     division: 'Barishal',
     about: 'Dr. Arif Hossain provides patient-focused neurological care with an emphasis on diagnosis and treatment.',
     fees: 50,
-    address: {
-      line1: 'Nathullabad',
-      line2: 'Barishal, Bangladesh'
-    }
+    address: { line1: 'Nathullabad', line2: 'Barishal, Bangladesh' },
   },
   {
     _id: 'doc7',
+    order: 7,
     name: 'Dr. Tanvir Ahmed',
-    image: doc7,
+    image: '/src/assets/doc7.png',
     speciality: 'General physician',
     degree: 'MBBS',
     experience: '4 Years',
     division: 'Rangpur',
     about: 'Dr. Tanvir Ahmed is committed to delivering comprehensive healthcare, preventive care, and effective treatment.',
     fees: 50,
-    address: {
-      line1: 'Jahaj Company Mor',
-      line2: 'Rangpur, Bangladesh'
-    }
+    address: { line1: 'Jahaj Company Mor', line2: 'Rangpur, Bangladesh' },
   },
   {
     _id: 'doc8',
+    order: 8,
     name: 'Dr. Mahjabin Chowdhury',
-    image: doc8,
+    image: '/src/assets/doc8.png',
     speciality: 'Gynecologist',
     degree: 'MBBS',
     experience: '3 Years',
     division: 'Mymensingh',
     about: 'Dr. Mahjabin Chowdhury focuses on women’s health, maternal care, and reproductive healthcare.',
     fees: 60,
-    address: {
-      line1: 'Ganginarpar',
-      line2: 'Mymensingh, Bangladesh'
-    }
+    address: { line1: 'Ganginarpar', line2: 'Mymensingh, Bangladesh' },
   },
   {
     _id: 'doc9',
+    order: 9,
     name: 'Dr. Samia Rahman',
-    image: doc9,
+    image: '/src/assets/doc9.png',
     speciality: 'Dermatologist',
     degree: 'MBBS',
     experience: '1 Years',
     division: 'Dhaka',
     about: 'Dr. Samia Rahman is dedicated to providing quality skin care and personalized dermatological treatment.',
     fees: 30,
-    address: {
-      line1: 'Uttara',
-      line2: 'Dhaka, Bangladesh'
-    }
+    address: { line1: 'Uttara', line2: 'Dhaka, Bangladesh' },
   },
   {
     _id: 'doc10',
+    order: 10,
     name: 'Dr. Imran Kabir',
-    image: doc10,
+    image: '/src/assets/doc10.png',
     speciality: 'Pediatricians',
     degree: 'MBBS',
     experience: '2 Years',
     division: 'Sylhet',
     about: 'Dr. Imran Kabir is focused on child health, pediatric diagnosis, and providing quality healthcare for children.',
     fees: 40,
-    address: {
-      line1: 'Ambarkhana',
-      line2: 'Sylhet, Bangladesh'
-    }
+    address: { line1: 'Ambarkhana', line2: 'Sylhet, Bangladesh' },
   },
   {
     _id: 'doc11',
+    order: 11,
     name: 'Dr. Ayesha Siddika',
-    image: doc11,
+    image: '/src/assets/doc11.png',
     speciality: 'Neurologist',
     degree: 'MBBS',
     experience: '4 Years',
     division: 'Chattogram',
     about: 'Dr. Ayesha Siddika focuses on neurological care, early diagnosis, and patient-centered treatment.',
     fees: 50,
-    address: {
-      line1: 'Panchlaish',
-      line2: 'Chattogram, Bangladesh'
-    }
+    address: { line1: 'Panchlaish', line2: 'Chattogram, Bangladesh' },
   },
   {
     _id: 'doc12',
+    order: 12,
     name: 'Dr. Mahmudul Hasan',
-    image: doc12,
+    image: '/src/assets/doc12.png',
     speciality: 'Neurologist',
     degree: 'MBBS',
     experience: '4 Years',
     division: 'Rajshahi',
     about: 'Dr. Mahmudul Hasan is committed to providing comprehensive neurological care and effective treatment.',
     fees: 50,
-    address: {
-      line1: 'Laxmipur',
-      line2: 'Rajshahi, Bangladesh'
-    }
+    address: { line1: 'Laxmipur', line2: 'Rajshahi, Bangladesh' },
   },
   {
     _id: 'doc13',
+    order: 13,
     name: 'Dr. Sharmin Akter',
-    image: doc13,
+    image: '/src/assets/doc13.png',
     speciality: 'General physician',
     degree: 'MBBS',
     experience: '4 Years',
     division: 'Khulna',
     about: 'Dr. Sharmin Akter is dedicated to preventive healthcare, early diagnosis, and comprehensive medical services.',
     fees: 50,
-    address: {
-      line1: 'Khalishpur',
-      line2: 'Khulna, Bangladesh'
-    }
+    address: { line1: 'Khalishpur', line2: 'Khulna, Bangladesh' },
   },
   {
     _id: 'doc14',
+    order: 14,
     name: 'Dr. Saiful Islam',
-    image: doc14,
+    image: '/src/assets/doc14.png',
     speciality: 'Gynecologist',
     degree: 'MBBS',
     experience: '3 Years',
     division: 'Barishal',
     about: 'Dr. Saiful Islam is committed to providing quality healthcare with a focus on women’s health and maternal care.',
     fees: 60,
-    address: {
-      line1: 'Sadar Road',
-      line2: 'Barishal, Bangladesh'
-    }
+    address: { line1: 'Sadar Road', line2: 'Barishal, Bangladesh' },
   },
   {
     _id: 'doc15',
+    order: 15,
     name: 'Dr. Tanjila Sultana',
-    image: doc15,
+    image: '/src/assets/doc15.png',
     speciality: 'Dermatologist',
     degree: 'MBBS',
     experience: '1 Years',
     division: 'Rangpur',
     about: 'Dr. Tanjila Sultana focuses on skin health, dermatological diagnosis, and personalized patient care.',
     fees: 30,
-    address: {
-      line1: 'Modern Mor',
-      line2: 'Rangpur, Bangladesh'
-    }
-  }
+    address: { line1: 'Modern Mor', line2: 'Rangpur, Bangladesh' },
+  },
 ]
+
+export default doctorSeeds
