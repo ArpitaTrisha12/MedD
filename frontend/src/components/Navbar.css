@@ -225,3 +225,26 @@
     padding: 8px 11px;
   }
 }
+
+/* About link and smooth navigation */
+
+.navbar-links li {
+  display: flex;
+  align-items: center;
+}
+
+.nav-link {
+  cursor: pointer;
+}
+
+/* Prevent navbar from covering Top Doctors heading */
+
+#more-doctors {
+  scroll-margin-top: 110px;
+}
+
+/* Smooth scrolling */
+
+html {
+  scroll-behavior: smooth;
+}

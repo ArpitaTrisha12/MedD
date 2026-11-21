@@ -15,7 +15,13 @@ export const registerPatient = async (account) => {
 }
 
 export const loginUser = async (credentials) => {
-  const { data } = await authClient.post('/api/auth/login', credentials)
+  const role = credentials.role
+  const endpoint = role === 'Patient'
+    ? '/api/auth/patient/login'
+    : role === 'Doctor'
+      ? '/api/auth/doctor/login'
+      : '/api/auth/admin/login'
+  const { data } = await authClient.post(endpoint, credentials)
   return data.user
 }
 
@@ -26,4 +32,14 @@ export const getCurrentUser = async () => {
 
 export const logoutUser = async () => {
   await authClient.post('/api/auth/logout')
+}
+
+export const fetchProfile = async () => {
+  const { data } = await authClient.get('/api/auth/profile')
+  return data.user
+}
+
+export const updateProfile = async (profile) => {
+  const { data } = await authClient.put('/api/auth/profile', profile)
+  return data.user
 }

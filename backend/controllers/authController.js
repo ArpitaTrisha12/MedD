@@ -1,11 +1,11 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import User from '../models/User.js'
+import Patient from '../models/Patient.js'
+import DoctorAccount from '../models/DoctorAccount.js'
+import Admin from '../models/Admin.js'
 import { authCookieName, getJwtSecret } from '../config/auth.js'
 
 const sessionDurationMs = 8 * 60 * 60 * 1000
-const allowedRoles = ['Patient', 'Doctor', 'Admin']
-
 const cookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -14,16 +14,25 @@ const cookieOptions = () => ({
   maxAge: sessionDurationMs,
 })
 
-const toPublicUser = (user) => ({
-  id: user._id.toString(),
-  name: user.fullName,
-  email: user.email,
-  role: user.role,
+const toPublicUser = (account, role) => ({
+  id: account._id.toString(),
+  name: account.fullName,
+  email: account.email,
+  role,
+  doctorId: account.doctorId || '',
+  phone: account.phone || '',
+  age: account.age ?? '',
+  gender: account.gender || '',
+  address: account.address || '',
+  qualification: account.qualification || '',
+  speciality: account.speciality || '',
+  experience: account.experience ?? '',
+  fee: account.fee ?? '',
 })
 
-const setSessionCookie = (res, user) => {
+const setSessionCookie = (res, account, role) => {
   const token = jwt.sign(
-    { sub: user._id.toString() },
+    { sub: account._id.toString(), role },
     getJwtSecret(),
     { expiresIn: '8h' },
   )
@@ -49,14 +58,13 @@ export const registerPatient = async (req, res, next) => {
 
   try {
     const passwordHash = await bcrypt.hash(password, 12)
-    const user = await User.create({
+    const patient = await Patient.create({
       fullName: normalizedName,
       email: normalizedEmail,
       passwordHash,
-      role: 'Patient',
     })
 
-    res.status(201).json({ user: toPublicUser(user) })
+    res.status(201).json({ user: toPublicUser(patient, 'Patient') })
   } catch (error) {
     if (error.code === 11000) {
       return res.status(409).json({ message: 'Unable to create an account with those details.' })
@@ -73,28 +81,44 @@ export const login = async (req, res, next) => {
   if (
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) ||
     typeof password !== 'string' ||
-    !allowedRoles.includes(role)
+    !['Patient', 'Doctor', 'Admin'].includes(role)
   ) {
     return res.status(400).json({ message: 'Provide a valid email, password, and account type.' })
   }
 
   try {
-    const user = await User.findOne({ email: normalizedEmail, role })
-      .select('+passwordHash')
+    const Account = role === 'Patient'
+      ? Patient
+      : role === 'Doctor'
+        ? DoctorAccount
+        : Admin
+    const account = await Account.findOne({ email: normalizedEmail }).select('+passwordHash')
 
-    const passwordMatches = user?.passwordHash
-      ? await bcrypt.compare(password, user.passwordHash)
+    const passwordMatches = account?.passwordHash
+      ? await bcrypt.compare(password, account.passwordHash)
       : false
 
-    if (!user || !user.isActive || !passwordMatches) {
+    if (!account || !account.isActive || !passwordMatches) {
       return res.status(401).json({ message: 'Incorrect email, password or account type.' })
     }
 
-    setSessionCookie(res, user)
-    res.json({ user: toPublicUser(user) })
+    setSessionCookie(res, account, role)
+    res.json({ user: toPublicUser(account, role) })
   } catch (error) {
     next(error)
   }
+}
+
+export const loginPatient = (req, res, next) => {
+  login({ ...req, body: { ...req.body, role: 'Patient' } }, res, next)
+}
+
+export const loginDoctor = (req, res, next) => {
+  login({ ...req, body: { ...req.body, role: 'Doctor' } }, res, next)
+}
+
+export const loginAdmin = (req, res, next) => {
+  login({ ...req, body: { ...req.body, role: 'Admin' } }, res, next)
 }
 
 export const logout = (_req, res) => {
@@ -104,5 +128,67 @@ export const logout = (_req, res) => {
 }
 
 export const getCurrentUser = (req, res) => {
-  res.json({ user: toPublicUser(req.user) })
+  res.json({ user: toPublicUser(req.user, req.accountRole) })
+}
+
+export const getProfile = (req, res) => {
+  res.json({ user: toPublicUser(req.user, req.accountRole) })
+}
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const allowedFields = [
+      'fullName',
+      'phone',
+      'age',
+      'gender',
+      'address',
+      'qualification',
+      'speciality',
+      'experience',
+      'fee',
+    ]
+    const updates = {}
+
+    for (const field of allowedFields) {
+      if (Object.prototype.hasOwnProperty.call(req.body ?? {}, field)) {
+        updates[field] = req.body[field]
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'fullName')) {
+      updates.fullName = String(updates.fullName).trim()
+      if (updates.fullName.length < 2) {
+        return res.status(400).json({ message: 'Full name must contain at least 2 characters.' })
+      }
+    }
+
+    for (const numericField of ['age', 'experience', 'fee']) {
+      if (Object.prototype.hasOwnProperty.call(updates, numericField)) {
+        if (updates[numericField] === '' || updates[numericField] === null) {
+          updates[numericField] = null
+        } else {
+          updates[numericField] = Number(updates[numericField])
+          if (!Number.isFinite(updates[numericField]) || updates[numericField] < 0) {
+            return res.status(400).json({ message: `Invalid ${numericField}.` })
+          }
+        }
+      }
+    }
+
+    const Account = req.accountRole === 'Patient'
+      ? Patient
+      : req.accountRole === 'Doctor'
+        ? DoctorAccount
+        : Admin
+    const account = await Account.findByIdAndUpdate(
+      req.user._id,
+      { $set: updates },
+      { new: true, runValidators: true },
+    ).lean()
+
+    res.json({ user: toPublicUser(account, req.accountRole) })
+  } catch (error) {
+    next(error)
+  }
 }

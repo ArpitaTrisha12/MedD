@@ -121,6 +121,53 @@
   color: #b42318;
 }
 
+.my-appointment-actions,
+.reschedule-panel {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.my-appointment-actions button,
+.reschedule-panel button {
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: #5f6fff;
+  color: #fff;
+  cursor: pointer;
+}
+
+.my-appointment-actions .cancel-action {
+  background: #b42318;
+}
+
+.reschedule-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #777;
+  font-size: 12px;
+}
+
+.reschedule-panel input {
+  padding: 8px;
+  border: 1px solid #d5d9e2;
+  border-radius: 7px;
+}
+
+.reschedule-times {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reschedule-times button.selected {
+  background: #2f9e75;
+}
+
 @media (max-width: 850px) {
   .my-appointment-card {
     grid-template-columns: 1fr;

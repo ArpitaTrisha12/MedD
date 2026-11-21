@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken'
-import User from '../models/User.js'
+import Patient from '../models/Patient.js'
+import DoctorAccount from '../models/DoctorAccount.js'
+import Admin from '../models/Admin.js'
 import { authCookieName, getJwtSecret } from '../config/auth.js'
 
 export const requireAuth = async (req, res, next) => {
@@ -16,15 +18,27 @@ export const requireAuth = async (req, res, next) => {
       return res.status(401).json({ message: 'Authentication is required.' })
     }
 
-    const user = await User.findById(payload.sub)
-      .select('_id fullName email role isActive')
-      .lean()
-
-    if (!user || !user.isActive) {
+    const role = payload.role
+    const Account = role === 'Patient'
+      ? Patient
+      : role === 'Doctor'
+        ? DoctorAccount
+        : role === 'Admin'
+          ? Admin
+          : null
+    if (!Account) {
       return res.status(401).json({ message: 'Authentication is required.' })
     }
 
-    req.user = user
+    const account = await Account.findById(payload.sub).lean()
+
+    if (!account || !account.isActive) {
+      return res.status(401).json({ message: 'Authentication is required.' })
+    }
+
+    req.user = account
+    req.accountRole = role
+    req.user.role = role
     next()
   } catch (error) {
     if (
@@ -44,7 +58,8 @@ export const requireRole = (...roles) => (req, res, next) => {
     return res.status(401).json({ message: 'Authentication is required.' })
   }
 
-  if (!roles.includes(req.user.role)) {
+  const accountRole = req.accountRole || req.user.role
+  if (!roles.includes(accountRole)) {
     return res.status(403).json({ message: 'You are not allowed to perform this action.' })
   }
 

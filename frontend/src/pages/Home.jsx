@@ -1,44 +1,85 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { assets, doctorImages, specialityData } from '../assets/assets'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import useAuth from '../context/useAuth'
 import useDoctors from '../hooks/useDoctors'
+import { createReview, fetchReviews } from '../services/reviewApi'
 import './Home.css'
-
-const REVIEW_EMAIL = 'your-email@example.com' // এখানে তোমার Email বসাবে
 
 const Home = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useAuth()
   const { doctors, isLoading, error } = useDoctors({ featured: true })
 
   const [review, setReview] = useState({
-    name: '',
-    email: '',
+    name: user?.name || '',
+    email: user?.email || '',
     rating: 5,
     message: ''
   })
+  const [reviews, setReviews] = useState([])
+  const [reviewMessage, setReviewMessage] = useState('')
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchReviews(controller.signal)
+      .then(setReviews)
+      .catch(() => setReviews([]))
+    return () => controller.abort()
+  }, [])
+
+  // About and Contact section scrolling
+  useEffect(() => {
+    if (
+      location.hash === '#more-doctors' ||
+      location.hash === '#contact-section'
+    ) {
+      const timer = setTimeout(() => {
+        document.getElementById(
+          location.hash.substring(1)
+        )?.scrollIntoView({
+          behavior: 'smooth',
+          block: location.hash === '#contact-section' ? 'end' : 'start'
+        })
+      }, 150)
+
+      return () => clearTimeout(timer)
+    }
+  }, [location.pathname, location.hash])
 
   const handleProtectedNavigation = (path) => {
     navigate(user ? path : '/login')
   }
 
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault()
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    if (user.role !== 'Patient') {
+      setReviewMessage('Only Patient accounts can submit reviews.')
+      return
+    }
 
-    const subject = encodeURIComponent('MedD Patient Review')
-
-    const body = encodeURIComponent(
-      `Patient Name: ${review.name}
-Patient Email: ${review.email}
-Rating: ${review.rating}/5
-
-Review:
-${review.message}`
-    )
-
-    window.location.href = `mailto:${REVIEW_EMAIL}?subject=${subject}&body=${body}`
+    setReviewMessage('')
+    try {
+      const savedReview = await createReview({
+        name: review.name || user.name,
+        rating: review.rating,
+        message: review.message,
+      })
+      setReviews((current) => [savedReview, ...current])
+      setReview((current) => ({ ...current, message: '', rating: 5 }))
+      setReviewMessage('Your review was saved successfully.')
+    } catch (requestError) {
+      setReviewMessage(
+        requestError.response?.data?.message ||
+        'Unable to save your review.',
+      )
+    }
   }
 
   return (
@@ -108,13 +149,14 @@ ${review.message}`
       </section>
 
       {/* Top Doctors Section */}
-      <section className="top-doctors">
+      <section className="top-doctors" id="more-doctors">
 
         <div className="section-heading">
           <h2>Top Doctors to Book</h2>
         </div>
 
         <div className="top-doctors-grid">
+
           {isLoading && <p>Loading doctors...</p>}
 
           {error && <p role="alert">{error}</p>}
@@ -153,6 +195,7 @@ ${review.message}`
               </div>
             </div>
           ))}
+
         </div>
 
         <button
@@ -167,7 +210,6 @@ ${review.message}`
       {/* Doctor Image + Patient Review Section */}
       <section className="appointment-review-layout">
 
-        {/* Doctor Image */}
         <div className="review-doctor-image">
           <img
             src={assets.appointment_img}
@@ -175,7 +217,6 @@ ${review.message}`
           />
         </div>
 
-        {/* Patient Review Section */}
         <div className="patient-review">
 
           <div className="section-heading">
@@ -191,7 +232,6 @@ ${review.message}`
             onSubmit={handleReviewSubmit}
           >
 
-            {/* Name and Email */}
             <div className="review-input-row">
 
               <div className="review-field">
@@ -203,7 +243,7 @@ ${review.message}`
                   id="review-name"
                   type="text"
                   placeholder="Enter your name"
-                  value={review.name}
+                  value={review.name || user?.name || ''}
                   onChange={(e) =>
                     setReview({
                       ...review,
@@ -223,7 +263,8 @@ ${review.message}`
                   id="review-email"
                   type="email"
                   placeholder="Enter your email"
-                  value={review.email}
+                  value={review.email || user?.email || ''}
+                  readOnly
                   onChange={(e) =>
                     setReview({
                       ...review,
@@ -236,7 +277,6 @@ ${review.message}`
 
             </div>
 
-            {/* Rating */}
             <div className="review-field">
 
               <label>Your Rating</label>
@@ -272,7 +312,6 @@ ${review.message}`
 
             </div>
 
-            {/* Review Message */}
             <div className="review-field">
 
               <label htmlFor="review-message">
@@ -295,7 +334,6 @@ ${review.message}`
 
             </div>
 
-            {/* Submit Button */}
             <button
               className="review-submit"
               type="submit"
@@ -304,17 +342,42 @@ ${review.message}`
             </button>
 
             <p className="review-note">
-              Submitting will open your email application with your review.
+              Reviews are saved securely to MedD.
             </p>
+            {reviewMessage && (
+              <p className="review-status" role="status">
+                {reviewMessage}
+              </p>
+            )}
 
           </form>
+
+          {reviews.length > 0 && (
+            <div className="saved-reviews">
+              <h3>Recent Patient Reviews</h3>
+              {reviews.slice(0, 3).map((item) => (
+                <article className="saved-review-card" key={item._id}>
+                  <div>
+                    <strong>{item.name}</strong>
+                    <span>{'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}</span>
+                  </div>
+                  <p>{item.message}</p>
+                  {item.createdAt && (
+                    <time dateTime={item.createdAt}>
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </time>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
 
         </div>
 
       </section>
 
       {/* Footer */}
-      <footer className="home-footer">
+      <footer className="home-footer" id="contact-section">
 
         <div className="footer-main">
 
@@ -335,11 +398,11 @@ ${review.message}`
               Home
             </button>
 
-            <button onClick={() => navigate('/about')}>
+            <button onClick={() => navigate('/#more-doctors')}>
               About Us
             </button>
 
-            <button onClick={() => navigate('/contact')}>
+            <button onClick={() => navigate('/#contact-section')}>
               Contact
             </button>
 

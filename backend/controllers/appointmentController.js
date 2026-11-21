@@ -107,7 +107,7 @@ const inTemporaryUnavailability = (doctor, date) => {
   return unavailable
 }
 
-export const calculateFee = async (patientId, doctorId, appointmentDate) => {
+export const calculateFee = async (patientId, doctorId, appointmentDate, excludeAppointmentId = null) => {
   const bookingDate = parseDate(appointmentDate)
   if (!bookingDate) {
     return { fee: STANDARD_FEE, discountApplied: false }
@@ -116,7 +116,7 @@ export const calculateFee = async (patientId, doctorId, appointmentDate) => {
   const cutoff = new Date(bookingDate)
   cutoff.setUTCMonth(cutoff.getUTCMonth() - 3)
 
-  const priorAppointment = await Appointment.findOne({
+  const priorFilter = {
     patient: patientId,
     doctor: doctorId,
     appointmentDate: {
@@ -124,7 +124,12 @@ export const calculateFee = async (patientId, doctorId, appointmentDate) => {
       $lt: appointmentDate,
     },
     status: { $ne: 'Cancelled' },
-  }).lean()
+  }
+  if (excludeAppointmentId) {
+    priorFilter._id = { $ne: excludeAppointmentId }
+  }
+
+  const priorAppointment = await Appointment.findOne(priorFilter).lean()
 
   if (priorAppointment) {
     return { fee: RETURNING_PATIENT_FEE, discountApplied: true }
@@ -219,7 +224,7 @@ export const createAppointment = async (req, res, next) => {
       })
     }
 
-    if (!doctor.visitingDays.includes(parsedDate.getUTCDay())) {
+    if (!Array.isArray(doctor.visitingDays) || !doctor.visitingDays.includes(parsedDate.getUTCDay())) {
       return res.status(400).json({
         message: 'This date is outside the doctor’s weekly visiting days.',
       })
@@ -293,6 +298,107 @@ export const getMyAppointments = async (req, res, next) => {
         }
       }),
     )
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const cancelAppointment = async (req, res, next) => {
+  try {
+    const appointment = await Appointment.findOne({
+      _id: req.params.id,
+      patient: req.user._id,
+    })
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found.' })
+    }
+    if (appointment.status === 'Cancelled') {
+      return res.status(409).json({ message: 'This appointment is already cancelled.' })
+    }
+    if (appointment.status === 'Completed') {
+      return res.status(409).json({ message: 'A completed appointment cannot be cancelled.' })
+    }
+
+    appointment.status = 'Cancelled'
+    await appointment.save()
+    res.json({ appointment })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const rescheduleAppointment = async (req, res, next) => {
+  try {
+    const appointment = await Appointment.findOne({
+      _id: req.params.id,
+      patient: req.user._id,
+    })
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found.' })
+    }
+    if (appointment.status === 'Cancelled' || appointment.status === 'Completed') {
+      return res.status(409).json({
+        message: 'Cancelled or completed appointments cannot be rescheduled.',
+      })
+    }
+
+    const { date, time } = req.body ?? {}
+    const parsedDate = parseDate(date)
+    if (!parsedDate) {
+      return res.status(400).json({ message: 'Provide a valid appointment date.' })
+    }
+    if (formatDate(parsedDate) < earliestBookingDate()) {
+      return res.status(400).json({
+        message: 'Appointments must be booked at least 7 days ahead.',
+      })
+    }
+
+    const doctor = await Doctor.findById(appointment.doctor).lean()
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found.' })
+    }
+
+    const validTimes = getVisitingTimesForDay(doctor, parsedDate.getUTCDay())
+    if (!validTimes.includes(time)) {
+      return res.status(400).json({ message: 'Select a valid appointment time.' })
+    }
+
+    const normalizedDate = formatDate(parsedDate)
+    if (inTemporaryUnavailability(doctor, normalizedDate)) {
+      return res.status(409).json({
+        message: 'The doctor is temporarily unavailable on this date.',
+      })
+    }
+
+    const conflict = await Appointment.findOne({
+      _id: { $ne: appointment._id },
+      doctor: appointment.doctor,
+      appointmentDate: normalizedDate,
+      appointmentTime: time,
+      status: { $ne: 'Cancelled' },
+    }).lean()
+    if (conflict) {
+      return res.status(409).json({
+        message: 'This appointment slot is already booked.',
+      })
+    }
+
+    const feeDetails = await calculateFee(
+      req.user._id,
+      appointment.doctor,
+      normalizedDate,
+      appointment._id,
+    )
+
+    appointment.appointmentDate = normalizedDate
+    appointment.appointmentTime = time
+    appointment.fee = feeDetails.fee
+    appointment.discountApplied = feeDetails.discountApplied
+    await appointment.save()
+
+    res.json({ appointment })
   } catch (error) {
     next(error)
   }

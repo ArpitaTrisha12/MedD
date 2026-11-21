@@ -35,3 +35,20 @@ export const fetchDoctorById = async (doctorId, signal) => {
   })
   return data
 }
+
+export const createDoctor = async (doctor) => {
+  const { data } = await doctorClient.post('/api/doctors', doctor)
+  return data
+}
+
+export const updateDoctor = async (doctorId, updates) => {
+  const { data } = await doctorClient.put(
+    `/api/doctors/${encodeURIComponent(doctorId)}`,
+    updates,
+  )
+  return data
+}
+
+export const deleteDoctor = async (doctorId) => {
+  await doctorClient.delete(`/api/doctors/${encodeURIComponent(doctorId)}`)
+}

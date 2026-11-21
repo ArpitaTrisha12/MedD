@@ -30,3 +30,18 @@ export const fetchMyAppointments = async (signal) => {
   const { data } = await appointmentClient.get('/api/appointments/mine', { signal })
   return data
 }
+
+export const cancelAppointment = async (appointmentId) => {
+  const { data } = await appointmentClient.delete(
+    `/api/appointments/${encodeURIComponent(appointmentId)}`,
+  )
+  return data.appointment
+}
+
+export const rescheduleAppointment = async (appointmentId, date, time) => {
+  const { data } = await appointmentClient.patch(
+    `/api/appointments/${encodeURIComponent(appointmentId)}/reschedule`,
+    { date, time },
+  )
+  return data.appointment
+}

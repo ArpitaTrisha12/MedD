@@ -1,18 +1,54 @@
 
 import { useState } from 'react'
 import { assets } from '../assets/assets'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import useAuth from '../context/useAuth'
 import './Navbar.css'
 
 const Navbar = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, status, logout } = useAuth()
+
   const [showMenu, setShowMenu] = useState(false)
   const [logoutError, setLogoutError] = useState('')
 
   const linkClass = ({ isActive }) =>
     isActive ? 'nav-link active' : 'nav-link'
+
+  // About navigation
+  const handleAboutClick = (e) => {
+    e.preventDefault()
+    setShowMenu(false)
+
+    if (location.pathname === '/') {
+      document.getElementById('more-doctors')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+
+      window.history.replaceState(null, '', '/#more-doctors')
+    } else {
+      navigate('/#more-doctors')
+    }
+  }
+
+  // Contact navigation
+  const handleContactClick = (e) => {
+    e.preventDefault()
+    setShowMenu(false)
+
+    if (location.pathname === '/') {
+      document.getElementById('contact-section')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end'
+      })
+
+      window.history.replaceState(null, '', '/#contact-section')
+    } else {
+      navigate('/#contact-section')
+    }
+  }
 
   const handleLogout = async () => {
     setLogoutError('')
@@ -37,28 +73,60 @@ const Navbar = () => {
       />
 
       <ul className="navbar-links">
+
         <li>
-          <NavLink to="/" end className={linkClass}>HOME</NavLink>
+          <NavLink to="/" end className={linkClass}>
+            HOME
+          </NavLink>
         </li>
+
         <li>
-          <NavLink to="/doctors" className={linkClass}>ALL DOCTORS</NavLink>
+          <NavLink to="/doctors" className={linkClass}>
+            ALL DOCTORS
+          </NavLink>
         </li>
+
         <li>
-          <NavLink to="/about" className={linkClass}>ABOUT</NavLink>
+          <a
+            href="/#more-doctors"
+            className={
+              location.pathname === '/' && location.hash === '#more-doctors'
+                ? 'nav-link active'
+                : 'nav-link'
+            }
+            onClick={handleAboutClick}
+          >
+            ABOUT
+          </a>
         </li>
+
         <li>
-          <NavLink to="/contact" className={linkClass}>CONTACT</NavLink>
+          <a
+            href="/#contact-section"
+            className={
+              location.pathname === '/' && location.hash === '#contact-section'
+                ? 'nav-link active'
+                : 'nav-link'
+            }
+            onClick={handleContactClick}
+          >
+            CONTACT
+          </a>
         </li>
+
       </ul>
 
       {status === 'loading' ? null : !user ? (
+
         <button
           className="create-account"
           onClick={() => navigate('/login')}
         >
           Create Account
         </button>
+
       ) : (
+
         <div className="navbar-profile">
 
           <img
@@ -113,10 +181,10 @@ const Navbar = () => {
               {user.role === 'Admin' && (
                 <>
                   <button onClick={() => {
-                    navigate('/add-doctor')
+                    navigate('/dashboard')
                     setShowMenu(false)
                   }}>
-                    Add Doctor
+                    Doctor Management
                   </button>
 
                   <button onClick={() => {
@@ -130,12 +198,16 @@ const Navbar = () => {
 
               <hr />
 
-              <button className="logout-option" onClick={handleLogout}>
+              <button
+                className="logout-option"
+                onClick={handleLogout}
+              >
                 Logout
               </button>
 
             </div>
           )}
+
         </div>
       )}
 

@@ -8,7 +8,15 @@ import {
 } from '../services/appointmentApi'
 import './Appointment.css'
 
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const WEEK_DAYS = [
+  { day: 6, name: 'Saturday' },
+  { day: 0, name: 'Sunday' },
+  { day: 1, name: 'Monday' },
+  { day: 2, name: 'Tuesday' },
+  { day: 3, name: 'Wednesday' },
+  { day: 4, name: 'Thursday' },
+  { day: 5, name: 'Friday' },
+]
 
 const formatDateInput = (date) => date.toISOString().slice(0, 10)
 
@@ -125,10 +133,6 @@ const Appointment = () => {
     return <p className="appointment-status appointment-error" role="alert">{doctorError}</p>
   }
 
-  const weeklyVisitNames = (doctor.visitingDays || [])
-    .map((day) => DAY_NAMES[day])
-    .join(', ')
-
   return (
     <div className="appointment-page">
       <div className="appointment-layout">
@@ -147,11 +151,20 @@ const Appointment = () => {
             {doctor.address && (
               <p>{doctor.address.line1}, {doctor.address.line2}</p>
             )}
-            {weeklyVisitNames && (
-              <p className="appointment-visiting-days">
-                Visiting days: {weeklyVisitNames}
-              </p>
-            )}
+            <div className="appointment-visiting-section">
+              <p className="appointment-visiting-label">Visiting days</p>
+              <div className="appointment-day-card-grid" aria-label="Doctor visiting days">
+                {WEEK_DAYS.map(({ day, name }) => (
+                  <div
+                    key={day}
+                    className={`appointment-day-card ${(doctor.visitingDays || []).includes(day) ? 'active' : ''}`}
+                    aria-label={`${name}${(doctor.visitingDays || []).includes(day) ? ', visiting day' : ', unavailable day'}`}
+                  >
+                    {name}
+                  </div>
+                ))}
+              </div>
+            </div>
             <div className="appointment-fee">
               <span>Consultation fee</span>
               <strong>৳1,000</strong>
@@ -163,7 +176,10 @@ const Appointment = () => {
         </section>
 
         <section className="appointment-booking-card">
-          <h2>Book an Appointment</h2>
+          <div className="appointment-booking-heading">
+            <span>ONLINE BOOKING</span>
+            <h2>Book an Appointment</h2>
+          </div>
 
           {success ? (
             <div className="appointment-success" role="status">

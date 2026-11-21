@@ -1,0 +1,105 @@
+.dashboard-page { padding: 40px 0 70px; }
+.dashboard-heading h1 { margin: 0 0 6px; color: #262626; }
+.dashboard-heading p { color: #777; }
+.dashboard-status { padding: 40px 0; text-align: center; }
+.dashboard-error { color: #b42318; }
+.dashboard-notice { padding: 12px; border-radius: 8px; background: #eef1ff; color: #4657e8; }
+.dashboard-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 24px 0; }
+.dashboard-summary-card { display: flex; flex-direction: column; gap: 8px; padding: 18px; border: 1px solid #e1e5ef; border-radius: 10px; background: #fff; }
+.dashboard-summary-card span { color: #777; font-size: 13px; }
+.dashboard-summary-card strong { color: #4f63df; font-size: 24px; }
+.dashboard-section { margin-top: 20px; padding: 20px; border: 1px solid #e1e5ef; border-radius: 10px; background: #fff; }
+.dashboard-appointment-row, .admin-doctor-row { display: grid; grid-template-columns: 1fr 1fr auto auto; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #edf0f6; }
+.dashboard-appointment-row:last-child, .admin-doctor-row:last-child { border-bottom: 0; }
+.availability-editor { display: grid; gap: 12px; margin-top: 12px; }
+.day-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.day-card {
+  min-height: 64px;
+  min-width: 0;
+  width: 100%;
+  border: 2px solid #d8deea;
+  border-radius: 12px;
+  background: #f7f8fa;
+  color: #525966;
+  box-shadow: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.day-card span {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.day-card:hover {
+  border-color: #8d99ff;
+  transform: translateY(-1px);
+}
+
+.day-card.active {
+  border-color: #5f6fff;
+  background: #5f6fff;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(95, 111, 255, 0.22);
+}
+.availability-editor input, .dashboard-section select, .add-doctor-form input { padding: 10px; border: 1px solid #d5d9e2; border-radius: 7px; }
+.availability-editor button, .admin-doctor-row button, .dashboard-profile-button, .add-doctor-form button { padding: 10px 14px; border: 0; border-radius: 7px; background: #5f6fff; color: #fff; cursor: pointer; }
+.admin-doctor-row button.danger { background: #b42318; }
+.add-doctor-form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.add-doctor-form button { grid-column: 1 / -1; }
+.dashboard-profile-button { margin-top: 20px; }
+.add-doctor-account-form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+.add-doctor-account-form input,
+.add-doctor-account-form select,
+.add-doctor-account-form button { padding: 10px; border: 1px solid #d5d9e2; border-radius: 7px; }
+.add-doctor-account-form button { border: 0; background: #5f6fff; color: #fff; cursor: pointer; }
+.doctor-account-list { display: grid; gap: 4px; }
+.admin-review-list { display: grid; gap: 10px; }
+.admin-review-row { display: grid; grid-template-columns: 150px 1fr auto; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #edf0f6; }
+.admin-review-row span { color: #666; }
+.admin-review-row button { padding: 9px 12px; border: 0; border-radius: 7px; background: #b42318; color: #fff; cursor: pointer; }
+@media (max-width: 700px) {
+  .admin-review-row { grid-template-columns: 1fr; }
+}
+
+.medical-record-list { display: grid; gap: 10px; }
+.medical-record-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #edf0f6; }
+.medical-record-row div { display: flex; flex-direction: column; gap: 4px; }
+.medical-record-row span { color: #777; font-size: 13px; }
+.medical-record-row button { padding: 9px 12px; border: 0; border-radius: 7px; background: #5f6fff; color: #fff; cursor: pointer; }
+.prescription-form, .report-upload-form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+.prescription-form textarea, .prescription-form input, .prescription-form select, .prescription-form button,
+.report-upload-form input, .report-upload-form select, .report-upload-form button { padding: 10px; border: 1px solid #d5d9e2; border-radius: 7px; }
+.prescription-form textarea { min-height: 70px; }
+.prescription-form button, .report-upload-form button { border: 0; background: #5f6fff; color: #fff; cursor: pointer; }
+@media (max-width: 700px) {
+  .prescription-form, .report-upload-form { grid-template-columns: 1fr; }
+  .medical-record-row { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 700px) {
+  .dashboard-appointment-row, .admin-doctor-row { grid-template-columns: 1fr; }
+  .add-doctor-form { grid-template-columns: 1fr; }
+  .add-doctor-account-form { grid-template-columns: 1fr; }
+  .day-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1050px) {
+  .day-card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+}

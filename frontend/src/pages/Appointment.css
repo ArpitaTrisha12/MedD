@@ -1,5 +1,8 @@
 .appointment-page {
   padding: 40px 0 70px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(95, 111, 255, 0.07), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(0, 198, 255, 0.06), transparent 24%);
 }
 
 .appointment-layout {
@@ -11,11 +14,43 @@
 
 .appointment-doctor-card,
 .appointment-booking-card {
-  border: 1px solid #e1e5ef;
-  border-radius: 14px;
+  border: 1px solid rgba(215, 220, 234, 0.9);
+  border-radius: 18px;
   background: #fff;
-  box-shadow: 0 10px 30px rgba(35, 64, 110, 0.07);
+  box-shadow: 0 14px 38px rgba(35, 64, 110, 0.11);
   overflow: hidden;
+  animation: appointment-card-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.appointment-booking-card {
+  animation-delay: 0.08s;
+  position: relative;
+}
+
+.appointment-booking-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, #4f63df, #00b8d9, #7b61ff);
+  background-size: 200% 100%;
+  animation: appointment-gradient-flow 4s ease infinite;
+}
+
+@keyframes appointment-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes appointment-gradient-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .appointment-doctor-image {
@@ -23,7 +58,36 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: #eaefff;
+  background: linear-gradient(145deg, #eef2ff, #dfeaff);
+  position: relative;
+  overflow: hidden;
+}
+
+.appointment-doctor-image::after {
+  content: '';
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  background: rgba(95, 111, 255, 0.09);
+  bottom: -150px;
+  right: -80px;
+  animation: appointment-soft-float 5s ease-in-out infinite;
+}
+
+.appointment-doctor-image img {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.35s ease;
+}
+
+.appointment-doctor-card:hover .appointment-doctor-image img {
+  transform: scale(1.025);
+}
+
+@keyframes appointment-soft-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 .appointment-doctor-image img {
@@ -43,10 +107,80 @@
   font-weight: 600;
 }
 
+.appointment-visiting-section {
+  margin-top: 14px;
+}
+
+.appointment-visiting-label {
+  color: #444;
+  font-weight: 700;
+  margin-bottom: 8px !important;
+}
+
+.appointment-day-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.appointment-day-card {
+  min-height: 46px;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #dde2ec;
+  border-radius: 10px;
+  background: #f4f5f7;
+  color: #525966;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+.appointment-day-card:hover {
+  transform: translateY(-2px);
+  border-color: #9aa5ff;
+}
+
+.appointment-day-card.active {
+  border-color: #4f63df;
+  background: linear-gradient(135deg, #5f6fff, #4d66df);
+  color: #fff;
+  box-shadow: 0 7px 16px rgba(95, 111, 255, 0.28);
+}
+
+@media (max-width: 1050px) {
+  .appointment-day-card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+
+@media (max-width: 500px) {
+  .appointment-day-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+
 .appointment-doctor-info h1 {
   margin: 5px 0 10px;
   color: #262626;
   font-size: 22px;
+}
+
+.appointment-visiting-section {
+  padding: 12px;
+  border: 1px solid #edf0f7;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fbfcff, #f5f7ff);
 }
 
 .appointment-doctor-info p {
@@ -60,8 +194,9 @@
   align-items: center;
   margin-top: 18px;
   padding: 14px;
-  border-radius: 8px;
-  background: #f2f4ff;
+  border: 1px solid #e4e8ff;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f7f8ff, #edf4ff);
   color: #444;
 }
 
@@ -76,12 +211,31 @@
 
 .appointment-booking-card {
   padding: 28px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.98));
 }
 
 .appointment-booking-card h2 {
-  margin: 0 0 20px;
-  color: #262626;
+  margin: 5px 0 20px;
+  background: linear-gradient(90deg, #26357d, #5f6fff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-size: 24px;
+}
+
+.appointment-booking-heading > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border: 1px solid #dfe4ff;
+  border-radius: 999px;
+  background: #f3f5ff;
+  color: #4657df;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
 }
 
 .appointment-booking-card form {
@@ -100,9 +254,17 @@
   height: 46px;
   padding: 0 12px;
   border: 1px solid #d7ddea;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #333;
   background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.appointment-booking-card input[type='date']:focus {
+  outline: none;
+  border-color: #5f6fff;
+  box-shadow: 0 0 0 4px rgba(95, 111, 255, 0.11);
+  transform: translateY(-1px);
 }
 
 .appointment-rule {
@@ -131,17 +293,32 @@
 .appointment-time-grid button {
   height: 42px;
   border: 1px solid #d7ddea;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fff;
   color: #444;
   cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.appointment-time-grid button:hover {
+  transform: translateY(-2px);
+  border-color: #7f8cff;
+  box-shadow: 0 7px 16px rgba(95, 111, 255, 0.12);
 }
 
 .appointment-time-grid button.selected {
-  border-color: #5f6fff;
-  background: #e9edff;
+  border-color: #4f63df;
+  background: linear-gradient(135deg, #eef1ff, #e1edff);
   color: #4657e8;
   font-weight: 700;
+  box-shadow: 0 0 0 3px rgba(95, 111, 255, 0.10), 0 8px 18px rgba(95, 111, 255, 0.12);
+  animation: appointment-slot-pop 0.25s ease;
+}
+
+@keyframes appointment-slot-pop {
+  0% { transform: scale(0.94); }
+  70% { transform: scale(1.025); }
+  100% { transform: scale(1); }
 }
 
 .appointment-form-error {
@@ -153,15 +330,25 @@
 .appointment-success button {
   min-height: 46px;
   border: none;
-  border-radius: 8px;
-  background: #5f6fff;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #5f6fff, #4657df);
   color: #fff;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 9px 20px rgba(95, 111, 255, 0.20);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.appointment-submit:not(:disabled):hover,
+.appointment-success button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(95, 111, 255, 0.30);
+  filter: brightness(1.03);
 }
 
 .appointment-submit:disabled {
-  background: #aeb5d6;
+  background: linear-gradient(135deg, #c4c9e6, #aeb5d6);
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -177,9 +364,21 @@
 .appointment-success {
   padding: 25px;
   border: 1px solid #b9decf;
-  border-radius: 10px;
-  background: #edf8f3;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #edf8f3, #f7fcfa);
   color: #285d49;
+  animation: appointment-success-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes appointment-success-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .appointment-success h3 {
@@ -209,5 +408,25 @@
 
   .appointment-time-grid {
     grid-template-columns: repeat(2, minmax(80px, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appointment-doctor-card,
+  .appointment-booking-card,
+  .appointment-success,
+  .appointment-time-grid button.selected {
+    animation: none;
+  }
+
+  .appointment-booking-card::before,
+  .appointment-doctor-image::after {
+    animation: none;
+  }
+
+  .appointment-doctor-card *,
+  .appointment-submit,
+  .appointment-success button {
+    transition: none;
   }
 }

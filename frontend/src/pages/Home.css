@@ -543,6 +543,57 @@
   margin-top: 13px;
 }
 
+.review-status {
+  color: #22785a;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.saved-reviews {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto 0;
+}
+
+.saved-reviews h3 {
+  margin: 0;
+  color: #263247;
+  font-size: 16px;
+}
+
+.saved-review-card {
+  padding: 12px 14px;
+  border: 1px solid #dfe5f0;
+  border-radius: 10px;
+  background: #fff;
+  text-align: left;
+}
+
+.saved-review-card div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.saved-review-card div span {
+  color: #f4a51c;
+  letter-spacing: 1px;
+}
+
+.saved-review-card p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 13px;
+}
+
+.saved-review-card time {
+  color: #888;
+  font-size: 12px;
+}
+
 /* =================================
    FOOTER
 ================================= */
@@ -618,6 +669,13 @@
 .footer-bottom p {
   color: #697386;
   font-size: 13px;
+}
+#more-doctors {
+  scroll-margin-top: 110px;
+}
+
+#contact-section {
+  scroll-margin-top: 20px;
 }
 
 /* =================================
