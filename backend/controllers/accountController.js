@@ -5,7 +5,7 @@ import Doctor from '../models/Doctor.js'
 export const listDoctorAccounts = async (_req, res, next) => {
   try {
     const accounts = await DoctorAccount.find()
-      .select('_id fullName email doctorId isActive createdAt updatedAt')
+      .select('_id fullName email doctorId isActive image createdAt updatedAt')
       .sort({ fullName: 1 })
       .lean()
     res.json(accounts)

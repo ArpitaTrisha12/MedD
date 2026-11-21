@@ -131,7 +131,7 @@ const Navbar = () => {
 
           <img
             className="navbar-profile-image"
-            src={assets.profile_pic}
+            src={user?.image || assets.profile_pic}
             alt="Profile"
             onClick={() => setShowMenu(!showMenu)}
           />

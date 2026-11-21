@@ -13,6 +13,8 @@
     "auth:provision-user": "node scripts/provisionUser.js",
     "auth:migrate-accounts": "node scripts/migrateAccounts.js",
     "auth:provision-admin": "node scripts/provisionAdmin.js",
+    "auth:provision-demo": "node scripts/provisionDemoAccounts.js",
+    "demo:update-images": "node scripts/updateDemoAccountImages.js",
     "test": "node --test"
   },
   "dependencies": {

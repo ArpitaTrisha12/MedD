@@ -167,40 +167,40 @@ const Dashboard = () => {
     } catch (requestError) {
       setNotice(requestError.response?.data?.message || 'Unable to delete review.')
     }
+  }
 
-    const addDoctorAccount = async (event) => {
-      event.preventDefault()
-      try {
-        const account = await createDoctorAccount(doctorAccountForm)
-        setDoctorAccounts((current) => [...current, account])
-        setDoctorAccountForm({ fullName: '', email: '', password: '', doctorId: '' })
-        setNotice('Doctor login account created.')
-      } catch (requestError) {
-        setNotice(requestError.response?.data?.message || 'Unable to create Doctor account.')
-      }
+  const addDoctorAccount = async (event) => {
+    event.preventDefault()
+    try {
+      const account = await createDoctorAccount(doctorAccountForm)
+      setDoctorAccounts((current) => [...current, account])
+      setDoctorAccountForm({ fullName: '', email: '', password: '', doctorId: '' })
+      setNotice('Doctor login account created.')
+    } catch (requestError) {
+      setNotice(requestError.response?.data?.message || 'Unable to create Doctor account.')
     }
+  }
 
-    const toggleDoctorAccount = async (account) => {
-      try {
-        const updated = await updateDoctorAccount(account._id, { isActive: !account.isActive })
-        setDoctorAccounts((current) =>
-          current.map((item) => item._id === account._id ? updated : item),
-        )
-        setNotice(updated.isActive ? 'Doctor account activated.' : 'Doctor account deactivated.')
-      } catch (requestError) {
-        setNotice(requestError.response?.data?.message || 'Unable to update Doctor account.')
-      }
+  const toggleDoctorAccount = async (account) => {
+    try {
+      const updated = await updateDoctorAccount(account._id, { isActive: !account.isActive })
+      setDoctorAccounts((current) =>
+        current.map((item) => item._id === account._id ? updated : item),
+      )
+      setNotice(updated.isActive ? 'Doctor account activated.' : 'Doctor account deactivated.')
+    } catch (requestError) {
+      setNotice(requestError.response?.data?.message || 'Unable to update Doctor account.')
     }
+  }
 
-    const removeDoctorAccount = async (account) => {
-      if (!window.confirm('Remove this Doctor login account?')) return
-      try {
-        await deleteDoctorAccount(account._id)
-        setDoctorAccounts((current) => current.filter((item) => item._id !== account._id))
-        setNotice('Doctor login account removed.')
-      } catch (requestError) {
-        setNotice(requestError.response?.data?.message || 'Unable to remove Doctor account.')
-      }
+  const removeDoctorAccount = async (account) => {
+    if (!window.confirm('Remove this Doctor login account?')) return
+    try {
+      await deleteDoctorAccount(account._id)
+      setDoctorAccounts((current) => current.filter((item) => item._id !== account._id))
+      setNotice('Doctor login account removed.')
+    } catch (requestError) {
+      setNotice(requestError.response?.data?.message || 'Unable to remove Doctor account.')
     }
   }
 
@@ -560,7 +560,7 @@ const Dashboard = () => {
               {doctors.map((doctor) => (
                 <div className="admin-doctor-row" key={doctor._id}>
                   <strong>{doctor.name}</strong>
-                  <span>{doctor.speciality} • ৳{doctor.fees}</span>
+                  <span>{doctor.speciality} • ৳{(doctor.fees ?? 1000).toLocaleString('en-BD')}</span>
                   <button type="button" onClick={() => editDoctor(doctor._id)}>Manage</button>
                   <button type="button" className="danger" onClick={() => removeDoctor(doctor._id)}>Remove</button>
                 </div>

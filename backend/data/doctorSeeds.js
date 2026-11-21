@@ -21,7 +21,7 @@ const doctorSeeds = [
       reason: 'Temporary leave',
     },
     about: 'Dr. Rahim Uddin is dedicated to providing quality medical care, focusing on preventive medicine, early diagnosis, and effective treatment.',
-    fees: 50,
+    fees: 1000,
     address: { line1: 'Dhanmondi', line2: 'Dhaka, Bangladesh' },
   },
   {
@@ -40,7 +40,7 @@ const doctorSeeds = [
       { day: 4, startTime: '15:00', endTime: '19:00' },
     ],
     about: 'Dr. Nusrat Jahan is committed to providing compassionate healthcare for women, focusing on reproductive health and maternal care.',
-    fees: 60,
+    fees: 1000,
     address: { line1: 'Zindabazar', line2: 'Sylhet, Bangladesh' },
   },
   {
@@ -59,7 +59,7 @@ const doctorSeeds = [
       { day: 6, startTime: '10:00', endTime: '16:00' },
     ],
     about: 'Dr. Farhan Ahmed focuses on skin health, proper diagnosis, and personalized dermatological treatment.',
-    fees: 30,
+    fees: 1000,
     address: { line1: 'GEC Circle', line2: 'Chattogram, Bangladesh' },
   },
   {
@@ -78,7 +78,7 @@ const doctorSeeds = [
       { day: 5, startTime: '09:00', endTime: '13:00' },
     ],
     about: 'Dr. Mohammad Hasan is passionate about child healthcare, growth monitoring, disease prevention, and pediatric treatment.',
-    fees: 40,
+    fees: 1000,
     address: { line1: 'Shaheb Bazar', line2: 'Rajshahi, Bangladesh' },
   },
   {
@@ -97,7 +97,7 @@ const doctorSeeds = [
       { day: 6, startTime: '10:00', endTime: '14:00' },
     ],
     about: 'Dr. Sadia Islam is dedicated to neurological healthcare, focusing on accurate diagnosis and effective treatment.',
-    fees: 50,
+    fees: 1000,
     address: { line1: 'Sonadanga', line2: 'Khulna, Bangladesh' },
   },
   {
@@ -116,7 +116,7 @@ const doctorSeeds = [
       { day: 5, startTime: '09:00', endTime: '15:00' },
     ],
     about: 'Dr. Arif Hossain provides patient-focused neurological care with an emphasis on diagnosis and treatment.',
-    fees: 50,
+    fees: 1000,
     address: { line1: 'Nathullabad', line2: 'Barishal, Bangladesh' },
   },
   {
@@ -135,7 +135,7 @@ const doctorSeeds = [
       { day: 6, startTime: '09:00', endTime: '13:00' },
     ],
     about: 'Dr. Tanvir Ahmed is committed to delivering comprehensive healthcare, preventive care, and effective treatment.',
-    fees: 50,
+    fees: 1000,
     address: { line1: 'Jahaj Company Mor', line2: 'Rangpur, Bangladesh' },
   },
   {
@@ -154,7 +154,7 @@ const doctorSeeds = [
       { day: 5, startTime: '10:00', endTime: '15:00' },
     ],
     about: 'Dr. Mahjabin Chowdhury focuses on women’s health, maternal care, and reproductive healthcare.',
-    fees: 60,
+    fees: 1000,
     address: { line1: 'Ganginarpar', line2: 'Mymensingh, Bangladesh' },
   },
   {
@@ -173,7 +173,7 @@ const doctorSeeds = [
       { day: 4, startTime: '09:00', endTime: '13:00' },
     ],
     about: 'Dr. Samia Rahman is dedicated to providing quality skin care and personalized dermatological treatment.',
-    fees: 30,
+    fees: 1000,
     address: { line1: 'Uttara', line2: 'Dhaka, Bangladesh' },
   },
   {
@@ -192,7 +192,7 @@ const doctorSeeds = [
       { day: 6, startTime: '09:00', endTime: '13:00' },
     ],
     about: 'Dr. Imran Kabir is focused on child health, pediatric diagnosis, and providing quality healthcare for children.',
-    fees: 40,
+    fees: 1000,
     address: { line1: 'Ambarkhana', line2: 'Sylhet, Bangladesh' },
   },
   {
@@ -211,7 +211,7 @@ const doctorSeeds = [
       { day: 5, startTime: '09:00', endTime: '14:00' },
     ],
     about: 'Dr. Ayesha Siddika focuses on neurological care, early diagnosis, and patient-centered treatment.',
-    fees: 50,
+    fees: 1000,
     address: { line1: 'Panchlaish', line2: 'Chattogram, Bangladesh' },
   },
   {
@@ -230,7 +230,7 @@ const doctorSeeds = [
       { day: 6, startTime: '10:00', endTime: '15:00' },
     ],
     about: 'Dr. Mahmudul Hasan is committed to providing comprehensive neurological care and effective treatment.',
-    fees: 50,
+    fees: 1000,
     address: { line1: 'Laxmipur', line2: 'Rajshahi, Bangladesh' },
   },
   {
@@ -249,7 +249,7 @@ const doctorSeeds = [
       { day: 5, startTime: '09:00', endTime: '13:00' },
     ],
     about: 'Dr. Sharmin Akter is dedicated to preventive healthcare, early diagnosis, and comprehensive medical services.',
-    fees: 50,
+    fees: 1000,
     address: { line1: 'Khalishpur', line2: 'Khulna, Bangladesh' },
   },
   {
@@ -268,7 +268,7 @@ const doctorSeeds = [
       { day: 6, startTime: '10:00', endTime: '15:00' },
     ],
     about: 'Dr. Saiful Islam is committed to providing quality healthcare with a focus on women’s health and maternal care.',
-    fees: 60,
+    fees: 1000,
     address: { line1: 'Sadar Road', line2: 'Barishal, Bangladesh' },
   },
   {
@@ -287,7 +287,7 @@ const doctorSeeds = [
       { day: 5, startTime: '09:00', endTime: '12:00' },
     ],
     about: 'Dr. Tanjila Sultana focuses on skin health, dermatological diagnosis, and personalized patient care.',
-    fees: 30,
+    fees: 1000,
     address: { line1: 'Modern Mor', line2: 'Rangpur, Bangladesh' },
   },
 ]

@@ -28,6 +28,7 @@ const toPublicUser = (account, role) => ({
   speciality: account.speciality || '',
   experience: account.experience ?? '',
   fee: account.fee ?? '',
+  image: account.image || '',
 })
 
 const setSessionCookie = (res, account, role) => {

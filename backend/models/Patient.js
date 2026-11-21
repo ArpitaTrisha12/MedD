@@ -10,6 +10,7 @@ const patientSchema = new mongoose.Schema(
     age: { type: Number, min: 0, default: null },
     gender: { type: String, default: '', trim: true },
     address: { type: String, default: '', trim: true },
+    image: { type: String, default: '', trim: true },
   },
   { timestamps: true },
 )

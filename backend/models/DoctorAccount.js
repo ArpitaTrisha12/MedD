@@ -9,6 +9,7 @@ const doctorAccountSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
     phone: { type: String, default: '', trim: true },
     address: { type: String, default: '', trim: true },
+    image: { type: String, default: '', trim: true },
   },
   { timestamps: true },
 )

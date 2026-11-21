@@ -17,6 +17,16 @@ const migrateDoctors = async () => {
     }))
 
     const result = await Doctor.bulkWrite(operations)
+    await Doctor.updateMany(
+      {
+        $or: [
+          { fees: { $in: [50, 60, 30, 40] } },
+          { fees: { $exists: false } },
+          { fees: null },
+        ],
+      },
+      { $set: { fees: 1000 } },
+    )
     const sourceIds = doctorSeeds.map(({ _id }) => _id)
     const migratedCount = await Doctor.countDocuments({
       _id: { $in: sourceIds },

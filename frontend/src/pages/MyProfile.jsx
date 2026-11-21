@@ -31,7 +31,17 @@ const MyProfile = () => {
     <div className="my-profile-page">
       <div className="my-profile-card">
         <div className="my-profile-heading">
-          <div className="profile-avatar">{name.charAt(0).toUpperCase()}</div>
+          {profile?.image || user?.image ? (
+            <img
+              className="profile-avatar"
+              src={profile?.image || user.image}
+              alt={`${name} profile`}
+            />
+          ) : (
+            <div className="profile-avatar profile-avatar-fallback">
+              {name.charAt(0).toUpperCase()}
+            </div>
+          )}
           <h2>{name}</h2>
           <p>{user.role} Account</p>
         </div>

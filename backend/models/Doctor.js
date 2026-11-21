@@ -11,7 +11,7 @@ const doctorSchema = new mongoose.Schema(
     experience: { type: String, required: true, trim: true },
     division: { type: String, required: true, trim: true },
     about: { type: String, required: true, trim: true },
-    fees: { type: Number, required: true, min: 0 },
+    fees: { type: Number, required: true, min: 0, default: 1000 },
     visitingDays: {
       type: [Number],
       enum: [0, 1, 2, 3, 4, 5, 6],

@@ -81,7 +81,9 @@ export const createDoctor = async (req, res, next) => {
       experience: body.experience,
       division: body.division,
       about: body.about || '',
-      fees: Number(body.fees) || 1000,
+      fees: body.fees === '' || body.fees == null
+        ? 1000
+        : Number(body.fees),
       visitingDays: Array.isArray(body.visitingDays) ? body.visitingDays.map(Number) : [1, 2, 3, 4, 5],
       visitingHours: Array.isArray(body.visitingHours) ? body.visitingHours : [],
       temporaryUnavailability: body.temporaryUnavailability || {},
