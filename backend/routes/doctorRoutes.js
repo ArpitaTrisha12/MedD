@@ -1,8 +1,15 @@
 import { Router } from 'express'
-import { getDoctors } from '../controllers/doctorController.js'
+import {
+  getDoctorById,
+  getDoctors,
+  getFeaturedDoctors,
+} from '../controllers/doctorController.js'
+import { requireAuth } from '../middleware/authMiddleware.js'
 
 const router = Router()
 
-router.get('/', getDoctors)
+router.get('/featured', getFeaturedDoctors)
+router.get('/', requireAuth, getDoctors)
+router.get('/:id', requireAuth, getDoctorById)
 
 export default router

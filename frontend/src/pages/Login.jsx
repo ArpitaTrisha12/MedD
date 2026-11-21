@@ -1,9 +1,13 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import useAuth from '../context/useAuth'
+import { loginUser, registerPatient } from '../services/authApi'
 import './Login.css'
 
 const Login = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { setAuthenticatedUser } = useAuth()
 
   const [accountType, setAccountType] = useState('Patient')
   const [isLogin, setIsLogin] = useState(false)
@@ -11,142 +15,66 @@ const Login = () => {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [formMessage, setFormMessage] = useState('')
 
-  const demoAccounts = [
-    {
-      fullName: 'Demo Patient',
-      email: 'patient@medd.com',
-      password: '123456',
-      role: 'Patient'
-    },
-    {
-      fullName: 'Demo Doctor',
-      email: 'doctor@medd.com',
-      password: '123456',
-      role: 'Doctor'
-    },
-    {
-      fullName: 'Demo Admin',
-      email: 'admin@medd.com',
-      password: '123456',
-      role: 'Admin'
-    }
-  ]
-
-  const getAccounts = () => {
-    let accounts = []
-
-    try {
-      accounts = JSON.parse(
-        localStorage.getItem('meddAccounts') || '[]'
-      )
-    } catch {
-      accounts = []
-    }
-
-    if (!Array.isArray(accounts)) {
-      accounts = []
-    }
-
-    accounts = accounts.filter(
-      user =>
-        !demoAccounts.some(
-          demo => demo.email === user.email?.toLowerCase()
-        )
-    )
-
-    accounts = [...accounts, ...demoAccounts]
-
-    localStorage.setItem(
-      'meddAccounts',
-      JSON.stringify(accounts)
-    )
-
-    return accounts
-  }
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-
-    const accounts = getAccounts()
-    const cleanEmail = email.trim().toLowerCase()
+    setFormMessage('')
 
     // CREATE ACCOUNT
     if (!isLogin) {
       if (accountType !== 'Patient') {
-        alert('Doctor and Admin accounts require Admin approval.')
+        setFormMessage('Doctor and Admin accounts require Admin approval.')
         return
       }
 
-      const existingUser = accounts.find(
-        user => user.email.toLowerCase() === cleanEmail
-      )
+      try {
+        await registerPatient({
+          fullName,
+          email,
+          password,
+        })
 
-      if (existingUser) {
-        alert('This email already exists. Please login.')
-        return
+        setIsLogin(true)
+        setPassword('')
+        setFormMessage('Account created successfully. Please login.')
+      } catch (requestError) {
+        setFormMessage(
+          requestError.response?.data?.message ||
+          'Unable to create your account. Please try again.'
+        )
       }
 
-      accounts.push({
-        fullName: fullName.trim(),
-        email: cleanEmail,
-        password,
-        role: accountType
-      })
-
-      localStorage.setItem(
-        'meddAccounts',
-        JSON.stringify(accounts)
-      )
-
-      alert('Account created successfully! Please login.')
-
-      setIsLogin(true)
-      setPassword('')
       return
     }
-
-    // LOGIN
-    const matchedUser = accounts.find(
-      user =>
-        user.email.toLowerCase() === cleanEmail &&
-        user.password === password &&
-        user.role === accountType
-    )
-
-    if (!matchedUser) {
-      alert('Incorrect email, password or account type.')
-      return
-    }
-
-    localStorage.setItem(
-      'meddUser',
-      JSON.stringify({
-        name: matchedUser.fullName,
-        email: matchedUser.email,
-        role: matchedUser.role
-      })
-    )
-
-    let profiles = {}
 
     try {
-      profiles = JSON.parse(
-        localStorage.getItem('meddProfiles') || '{}'
-      )
-    } catch {
-      profiles = {}
-    }
+      const authenticatedUser = await loginUser({
+        email,
+        password,
+        role: accountType,
+      })
 
-    if (profiles[matchedUser.email]) {
-      navigate('/dashboard')
-    } else {
-      navigate('/profile-setup')
+      setAuthenticatedUser(authenticatedUser)
+      const returnTo = location.state?.from
+      navigate(returnTo
+        ? {
+          pathname: returnTo.pathname,
+          search: returnTo.search,
+          hash: returnTo.hash,
+        }
+        : '/')
+    } catch (requestError) {
+      setFormMessage(
+        requestError.response?.data?.message ||
+        'Unable to sign in. Please try again.'
+      )
     }
   }
 
   const selectRole = (role) => {
     setAccountType(role)
+    setFormMessage('')
   }
 
   return (
@@ -253,6 +181,7 @@ const Login = () => {
               onClick={() => {
                 setIsLogin(false)
                 setPassword('')
+                setFormMessage('')
               }}
             >
               Create Account
@@ -264,6 +193,7 @@ const Login = () => {
               onClick={() => {
                 setIsLogin(true)
                 setPassword('')
+                setFormMessage('')
               }}
             >
               Login
@@ -367,6 +297,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={isLogin ? undefined : 8}
               className="auth-input"
             />
 
@@ -376,6 +307,12 @@ const Login = () => {
             </button>
 
           </form>
+
+          {formMessage && (
+            <p className="auth-notice" role="alert">
+              {formMessage}
+            </p>
+          )}
 
           {/* BOTTOM LOGIN LINK */}
           <p className="auth-bottom-text">
@@ -389,6 +326,7 @@ const Login = () => {
               onClick={() => {
                 setIsLogin(!isLogin)
                 setPassword('')
+                setFormMessage('')
               }}
             >
               {isLogin ? 'Create Account' : 'Login here'}
@@ -396,7 +334,7 @@ const Login = () => {
 
           </p>
 
-          {!isLogin && accountType !== 'Patient' && (
+          {!isLogin && accountType !== 'Patient' && !formMessage && (
             <p className="auth-notice">
               Doctor and Admin accounts require Admin approval.
             </p>

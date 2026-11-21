@@ -1,28 +1,29 @@
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { assets } from '../assets/assets'
 import { NavLink, useNavigate } from 'react-router-dom'
+import useAuth from '../context/useAuth'
 import './Navbar.css'
 
 const Navbar = () => {
   const navigate = useNavigate()
+  const { user, status, logout } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
-
-  let user = null
-
-  try {
-    user = JSON.parse(localStorage.getItem('meddUser') || 'null')
-  } catch {
-    user = null
-  }
+  const [logoutError, setLogoutError] = useState('')
 
   const linkClass = ({ isActive }) =>
     isActive ? 'nav-link active' : 'nav-link'
 
-  const handleLogout = () => {
-    localStorage.removeItem('meddUser')
-    setShowMenu(false)
-    navigate('/login')
+  const handleLogout = async () => {
+    setLogoutError('')
+
+    try {
+      await logout()
+      setShowMenu(false)
+      navigate('/login')
+    } catch {
+      setLogoutError('Unable to log out. Please try again.')
+    }
   }
 
   return (
@@ -50,7 +51,7 @@ const Navbar = () => {
         </li>
       </ul>
 
-      {!user ? (
+      {status === 'loading' ? null : !user ? (
         <button
           className="create-account"
           onClick={() => navigate('/login')}
@@ -76,6 +77,8 @@ const Navbar = () => {
 
           {showMenu && (
             <div className="profile-dropdown">
+
+              {logoutError && <p role="alert">{logoutError}</p>}
 
               <p className="dropdown-user">
                 {user.name}

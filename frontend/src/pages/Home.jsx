@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { assets, doctorImages, specialityData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
+import useAuth from '../context/useAuth'
 import useDoctors from '../hooks/useDoctors'
 import './Home.css'
 
@@ -9,7 +10,8 @@ const REVIEW_EMAIL = 'your-email@example.com' // এখানে তোমার
 
 const Home = () => {
   const navigate = useNavigate()
-  const { doctors, isLoading, error } = useDoctors()
+  const { user } = useAuth()
+  const { doctors, isLoading, error } = useDoctors({ featured: true })
 
   const [review, setReview] = useState({
     name: '',
@@ -19,7 +21,6 @@ const Home = () => {
   })
 
   const handleProtectedNavigation = (path) => {
-    const user = localStorage.getItem('meddUser')
     navigate(user ? path : '/login')
   }
 

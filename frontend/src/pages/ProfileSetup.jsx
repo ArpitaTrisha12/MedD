@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import './ProfileSetup.css'
 
@@ -10,7 +10,7 @@ const ProfileSetup = () => {
 
   try {
     user = JSON.parse(localStorage.getItem('meddUser') || 'null')
-  } catch (error) {
+  } catch {
     localStorage.removeItem('meddUser')
   }
 

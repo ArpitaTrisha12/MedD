@@ -9,12 +9,17 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "migrate:doctors": "node scripts/migrateDoctors.js"
+    "migrate:doctors": "node scripts/migrateDoctors.js",
+    "auth:provision-user": "node scripts/provisionUser.js",
+    "test": "node --test"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.9.5"
   }
 }

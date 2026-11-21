@@ -14,10 +14,19 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    passwordHash: {
+      type: String,
+      required: true,
+      select: false,
+    },
     role: {
       type: String,
       enum: ['Patient', 'Doctor', 'Admin'],
       default: 'Patient',
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true },

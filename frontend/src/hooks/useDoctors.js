@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react'
-import { fetchDoctors } from '../services/doctorApi'
+import {
+  fetchDoctors,
+  fetchFeaturedDoctors,
+} from '../services/doctorApi'
 
-const useDoctors = () => {
+const useDoctors = ({ featured = false } = {}) => {
   const [doctors, setDoctors] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
+    const request = featured ? fetchFeaturedDoctors : fetchDoctors
 
-    fetchDoctors(controller.signal)
+    request(controller.signal)
       .then(setDoctors)
       .catch((requestError) => {
         if (!controller.signal.aborted) {
@@ -23,7 +27,7 @@ const useDoctors = () => {
       })
 
     return () => controller.abort()
-  }, [])
+  }, [featured])
 
   return { doctors, isLoading, error }
 }

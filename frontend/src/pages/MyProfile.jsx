@@ -1,17 +1,14 @@
 
-import React from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import useAuth from '../context/useAuth'
 import './MyProfile.css'
 
 const MyProfile = () => {
   const navigate = useNavigate()
-
-  let user = null
+  const { user } = useAuth()
   let profile = null
 
   try {
-    user = JSON.parse(localStorage.getItem('meddUser') || 'null')
-
     const allProfiles = JSON.parse(
       localStorage.getItem('meddProfiles') || '{}'
     )

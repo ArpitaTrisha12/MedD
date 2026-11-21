@@ -1,5 +1,4 @@
 
-import React from 'react'
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom'
 
 import Home from './pages/Home'
@@ -11,12 +10,21 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import MyProfile from './pages/MyProfile'
 import Appointment from './pages/Appointment'
+import useAuth from './context/useAuth'
 //import ProfileSetup from './pages/ProfileSetup'
 //import Dashboard from './pages/Dashboard'
 
 const ProtectedRoute = ({ children }) => {
   const location = useLocation()
-  const user = localStorage.getItem('meddUser')
+  const { user, status, error } = useAuth()
+
+  if (status === 'loading') {
+    return <p role="status">Checking your sign-in status...</p>
+  }
+
+  if (status === 'error') {
+    return <p role="alert">{error}</p>
+  }
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />

@@ -1,0 +1,138 @@
+.my-appointments-page {
+  padding: 40px 0 70px;
+}
+
+.my-appointments-heading {
+  margin-bottom: 28px;
+}
+
+.my-appointments-heading h1 {
+  margin: 0 0 8px;
+  color: #262626;
+  font-size: 28px;
+}
+
+.my-appointments-heading p,
+.my-appointments-empty p,
+.my-appointments-status {
+  color: #777;
+}
+
+.my-appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.my-appointment-card {
+  display: grid;
+  grid-template-columns: minmax(220px, 360px) 1fr;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid #e1e5ef;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(35, 64, 110, 0.06);
+}
+
+.my-appointment-doctor {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.my-appointment-doctor img {
+  width: 82px;
+  height: 82px;
+  border-radius: 10px;
+  background: #eaefff;
+  object-fit: contain;
+}
+
+.my-appointment-doctor h2 {
+  margin: 0 0 6px;
+  color: #333;
+  font-size: 17px;
+}
+
+.my-appointment-doctor p {
+  margin: 0;
+  color: #777;
+  font-size: 13px;
+}
+
+.my-appointment-details {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(90px, 1fr));
+  align-items: center;
+  gap: 12px;
+}
+
+.my-appointment-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.my-appointment-details span {
+  color: #888;
+  font-size: 12px;
+}
+
+.my-appointment-details strong {
+  color: #444;
+  font-size: 14px;
+}
+
+.appointment-status-badge {
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #eef1ff;
+  color: #4657e8 !important;
+  font-size: 12px !important;
+}
+
+.appointment-status-badge.confirmed,
+.appointment-status-badge.completed {
+  background: #e6f6ef;
+  color: #22785a !important;
+}
+
+.appointment-status-badge.cancelled {
+  background: #fdecec;
+  color: #b42318 !important;
+}
+
+.my-appointments-empty,
+.my-appointments-error {
+  padding: 30px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e1e5ef;
+}
+
+.my-appointments-empty h2 {
+  color: #333;
+  font-size: 18px;
+}
+
+.my-appointments-error {
+  color: #b42318;
+}
+
+@media (max-width: 850px) {
+  .my-appointment-card {
+    grid-template-columns: 1fr;
+  }
+
+  .my-appointment-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .my-appointment-details {
+    grid-template-columns: 1fr;
+  }
+}
