@@ -5,6 +5,7 @@ import {
   getMyAppointments,
   cancelAppointment,
   rescheduleAppointment,
+  confirmAppointment,
 } from '../controllers/appointmentController.js'
 import { requireAuth, requireRole } from '../middleware/authMiddleware.js'
 
@@ -15,6 +16,7 @@ router.get('/availability/:doctorId', getAvailability)
 router.get('/mine', requireRole('Patient'), getMyAppointments)
 router.post('/', requireRole('Patient'), createAppointment)
 router.patch('/:id/reschedule', requireRole('Patient'), rescheduleAppointment)
+router.patch('/:id/confirm', requireRole('Doctor'), confirmAppointment)
 router.delete('/:id', requireRole('Patient'), cancelAppointment)
 
 export default router

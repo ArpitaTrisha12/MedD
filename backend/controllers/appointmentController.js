@@ -1,5 +1,6 @@
 import Appointment from '../models/Appointment.js'
 import Doctor from '../models/Doctor.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 export const APPOINTMENT_TIMES = [
   '09:00',
@@ -256,6 +257,15 @@ export const createAppointment = async (req, res, next) => {
         status: 'Pending',
       })
 
+      await recordAudit({
+        action: 'Appointment booked',
+        userId: req.user._id,
+        userRole: 'Patient',
+        relatedRecordId: appointment._id,
+        module: 'appointments',
+        operationType: 'CREATE',
+      })
+
       res.status(201).json({ appointment })
     } catch (error) {
       if (error.code === 11000) {
@@ -322,6 +332,14 @@ export const cancelAppointment = async (req, res, next) => {
 
     appointment.status = 'Cancelled'
     await appointment.save()
+    await recordAudit({
+      action: 'Appointment cancelled',
+      userId: req.user._id,
+      userRole: 'Patient',
+      relatedRecordId: appointment._id,
+      module: 'appointments',
+      operationType: 'UPDATE',
+    })
     res.json({ appointment })
   } catch (error) {
     next(error)
@@ -397,6 +415,49 @@ export const rescheduleAppointment = async (req, res, next) => {
     appointment.fee = feeDetails.fee
     appointment.discountApplied = feeDetails.discountApplied
     await appointment.save()
+
+    await recordAudit({
+      action: 'Appointment rescheduled',
+      userId: req.user._id,
+      userRole: 'Patient',
+      relatedRecordId: appointment._id,
+      module: 'appointments',
+      operationType: 'UPDATE',
+    })
+
+    res.json({ appointment })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const confirmAppointment = async (req, res, next) => {
+  try {
+    if (!req.user.doctorId) {
+      return res.status(403).json({ message: 'This doctor account is not linked to a doctor profile.' })
+    }
+
+    const appointment = await Appointment.findOne({
+      _id: req.params.id,
+      doctor: req.user.doctorId,
+    })
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found.' })
+    }
+    if (appointment.status !== 'Pending') {
+      return res.status(409).json({ message: 'Only pending appointments can be confirmed.' })
+    }
+
+    appointment.status = 'Confirmed'
+    await appointment.save()
+    await recordAudit({
+      action: 'Appointment confirmed',
+      userId: req.user._id,
+      userRole: 'Doctor',
+      relatedRecordId: appointment._id,
+      module: 'appointments',
+      operationType: 'UPDATE',
+    })
 
     res.json({ appointment })
   } catch (error) {

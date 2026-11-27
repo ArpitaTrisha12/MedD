@@ -1,4 +1,5 @@
 import Doctor from '../models/Doctor.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 export const getFeaturedDoctors = async (_req, res, next) => {
   try {
@@ -90,6 +91,15 @@ export const createDoctor = async (req, res, next) => {
       address: body.address || { line1: '', line2: '' },
     })
 
+    await recordAudit({
+      action: 'Doctor profile created',
+      userId: req.user._id,
+      userRole: 'Admin',
+      relatedRecordId: doctor._id,
+      module: 'doctors',
+      operationType: 'CREATE',
+    })
+
     res.status(201).json(doctor)
   } catch (error) {
     if (error.code === 11000) {
@@ -134,6 +144,14 @@ export const updateDoctor = async (req, res, next) => {
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found.' })
     }
+    await recordAudit({
+      action: 'Doctor profile updated',
+      userId: req.user._id,
+      userRole: req.accountRole,
+      relatedRecordId: doctor._id,
+      module: 'doctors',
+      operationType: 'UPDATE',
+    })
     res.json(doctor)
   } catch (error) {
     next(error)
@@ -146,6 +164,14 @@ export const deleteDoctor = async (req, res, next) => {
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found.' })
     }
+    await recordAudit({
+      action: 'Doctor profile deleted',
+      userId: req.user._id,
+      userRole: 'Admin',
+      relatedRecordId: doctor._id,
+      module: 'doctors',
+      operationType: 'DELETE',
+    })
     res.status(204).end()
   } catch (error) {
     next(error)

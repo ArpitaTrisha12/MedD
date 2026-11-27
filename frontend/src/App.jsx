@@ -12,6 +12,7 @@ import Appointment from './pages/Appointment'
 import useAuth from './context/useAuth'
 import ProfileSetup from './pages/ProfileSetup'
 import Dashboard from './pages/Dashboard'
+import AuditHistory from './pages/AuditHistory'
 
 const ProtectedRoute = ({ children, roles }) => {
   const location = useLocation()
@@ -81,6 +82,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/audit-history"
+          element={
+            <ProtectedRoute roles={['Admin']}>
+              <AuditHistory />
             </ProtectedRoute>
           }
         />

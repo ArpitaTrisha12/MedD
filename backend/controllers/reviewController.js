@@ -1,4 +1,5 @@
 import Review from '../models/Review.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 export const getReviews = async (_req, res, next) => {
   try {
@@ -32,6 +33,15 @@ export const createReview = async (req, res, next) => {
       message,
     })
 
+    await recordAudit({
+      action: 'Patient review submitted',
+      userId: req.user._id,
+      userRole: 'Patient',
+      relatedRecordId: review._id,
+      module: 'reviews',
+      operationType: 'CREATE',
+    })
+
     res.status(201).json({
       _id: review._id,
       name: review.name,
@@ -50,6 +60,14 @@ export const deleteReview = async (req, res, next) => {
     if (!review) {
       return res.status(404).json({ message: 'Review not found.' })
     }
+    await recordAudit({
+      action: 'Patient review deleted',
+      userId: req.user._id,
+      userRole: 'Admin',
+      relatedRecordId: review._id,
+      module: 'reviews',
+      operationType: 'DELETE',
+    })
     res.status(204).end()
   } catch (error) {
     next(error)

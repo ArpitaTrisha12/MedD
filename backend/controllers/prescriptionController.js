@@ -3,6 +3,7 @@ import Prescription from '../models/Prescription.js'
 import Appointment from '../models/Appointment.js'
 import Doctor from '../models/Doctor.js'
 import Patient from '../models/Patient.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 const parseDate = (value) => (
   typeof value === 'string' &&
@@ -71,6 +72,15 @@ export const createPrescription = async (req, res, next) => {
       medicines: normalizedMedicines,
       prescriptionDate,
       notes: typeof notes === 'string' ? notes.trim() : '',
+    })
+
+    await recordAudit({
+      action: 'Prescription created',
+      userId: req.user._id,
+      userRole: 'Doctor',
+      relatedRecordId: prescription._id,
+      module: 'prescriptions',
+      operationType: 'CREATE',
     })
 
     res.status(201).json(prescription)

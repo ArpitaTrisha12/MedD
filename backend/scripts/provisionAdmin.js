@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import mongoose from 'mongoose'
 import connectDB from '../config/db.js'
 import Admin from '../models/Admin.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 const provisionAdmin = async () => {
   const fullName = process.env.PROVISION_ADMIN_NAME?.trim()
@@ -29,7 +30,15 @@ const provisionAdmin = async () => {
     }
 
     const passwordHash = await bcrypt.hash(password, 12)
-    await Admin.create({ fullName, email, passwordHash, isActive: true })
+    const admin = await Admin.create({ fullName, email, passwordHash, isActive: true })
+    await recordAudit({
+      action: 'Admin account created',
+      userId: admin._id,
+      userRole: 'Admin',
+      relatedRecordId: admin._id,
+      module: 'admins',
+      operationType: 'CREATE',
+    })
     console.log('Initial Admin account provisioned securely.')
   } finally {
     await mongoose.disconnect()

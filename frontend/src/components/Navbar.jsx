@@ -181,6 +181,13 @@ const Navbar = () => {
               {user.role === 'Admin' && (
                 <>
                   <button onClick={() => {
+                    navigate('/audit-history')
+                    setShowMenu(false)
+                  }}>
+                    Audit History
+                  </button>
+
+                  <button onClick={() => {
                     navigate('/dashboard')
                     setShowMenu(false)
                   }}>

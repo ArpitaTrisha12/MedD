@@ -10,6 +10,7 @@ import reviewRoutes from './routes/reviewRoutes.js'
 import prescriptionRoutes from './routes/prescriptionRoutes.js'
 import healthReportRoutes from './routes/healthReportRoutes.js'
 import accountRoutes from './routes/accountRoutes.js'
+import auditLogRoutes from './routes/auditLogRoutes.js'
 
 const app = express()
 
@@ -39,6 +40,7 @@ app.use('/api/reviews', reviewRoutes)
 app.use('/api/prescriptions', prescriptionRoutes)
 app.use('/api/health-reports', healthReportRoutes)
 app.use('/api/accounts', accountRoutes)
+app.use('/api/audit-logs', auditLogRoutes)
 
 app.use((error, _req, res, _next) => {
   console.error('API request failed:', error.message)

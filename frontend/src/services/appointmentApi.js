@@ -45,3 +45,10 @@ export const rescheduleAppointment = async (appointmentId, date, time) => {
   )
   return data.appointment
 }
+
+export const confirmAppointment = async (appointmentId) => {
+  const { data } = await appointmentClient.patch(
+    `/api/appointments/${encodeURIComponent(appointmentId)}/confirm`,
+  )
+  return data.appointment
+}

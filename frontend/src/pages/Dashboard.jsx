@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import useAuth from '../context/useAuth'
 import { fetchDashboard } from '../services/dashboardApi'
+import { confirmAppointment as confirmAppointmentRequest } from '../services/appointmentApi'
 import { fetchDoctors, fetchDoctorById, updateDoctor, deleteDoctor, createDoctor } from '../services/doctorApi'
 import { deleteReview, fetchReviews } from '../services/reviewApi'
 import {
@@ -169,6 +170,23 @@ const Dashboard = () => {
     }
   }
 
+  const confirmPendingAppointment = async (appointmentId) => {
+    try {
+      const updatedAppointment = await confirmAppointmentRequest(appointmentId)
+      setDashboard((current) => ({
+        ...current,
+        recentAppointments: current.recentAppointments.map((appointment) =>
+          appointment._id === updatedAppointment._id
+            ? { ...updatedAppointment, patient: appointment.patient }
+            : appointment,
+        ),
+      }))
+      setNotice('Appointment confirmed.')
+    } catch (requestError) {
+      setNotice(requestError.response?.data?.message || 'Unable to confirm appointment.')
+    }
+  }
+
   const addDoctorAccount = async (event) => {
     event.preventDefault()
     try {
@@ -314,6 +332,11 @@ const Dashboard = () => {
               <div className="dashboard-appointment-row" key={appointment._id}>
                 <strong>{appointment.appointmentDate} at {appointment.appointmentTime}</strong>
                 <span>{appointment.status}</span>
+                {dashboard.role === 'Doctor' && appointment.status === 'Pending' && (
+                  <button type="button" onClick={() => confirmPendingAppointment(appointment._id)}>
+                    Confirm
+                  </button>
+                )}
               </div>
             ))
           )}

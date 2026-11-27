@@ -7,6 +7,7 @@ import DoctorAccount from '../models/DoctorAccount.js'
 import Admin from '../models/Admin.js'
 import Doctor from '../models/Doctor.js'
 import User from '../models/User.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 const demoPatients = [
   { fullName: 'Arif Hossain', email: 'arif.patient@gmail.com', passwordKey: 'arifPatient', image: 'https://randomuser.me/api/portraits/men/32.jpg' },
@@ -91,12 +92,20 @@ const provisionDemoAccounts = async () => {
         continue
       }
       const passwordHash = await bcrypt.hash(passwords[patient.passwordKey], 12)
-      await Patient.create({
+      const createdPatient = await Patient.create({
         fullName: patient.fullName,
         email,
         passwordHash,
         isActive: true,
         image: patient.image,
+      })
+      await recordAudit({
+        action: 'Patient account created',
+        userId: createdPatient._id,
+        userRole: 'Patient',
+        relatedRecordId: createdPatient._id,
+        module: 'patients',
+        operationType: 'CREATE',
       })
       patientEmails.add(email)
       result.patientsCreated += 1
@@ -160,13 +169,21 @@ const provisionDemoAccounts = async () => {
       }
 
       const passwordHash = await bcrypt.hash(passwords[doctor.passwordKey], 12)
-      await DoctorAccount.create({
+      const createdAccount = await DoctorAccount.create({
         fullName: doctor.fullName,
         email,
         passwordHash,
         doctorId,
         isActive: true,
         image: doctor.image,
+      })
+      await recordAudit({
+        action: 'Doctor account created',
+        userId: createdAccount._id,
+        userRole: 'Doctor',
+        relatedRecordId: createdAccount._id,
+        module: 'doctorAccounts',
+        operationType: 'CREATE',
       })
       doctorEmails.add(email)
       doctorIds.add(doctorId)
@@ -181,12 +198,20 @@ const provisionDemoAccounts = async () => {
       result.adminDuplicatesSkipped += 1
     } else {
       const passwordHash = await bcrypt.hash(passwords[demoAdmin.passwordKey], 12)
-      await Admin.create({
+      const createdAdmin = await Admin.create({
         fullName: demoAdmin.fullName,
         email: adminEmail,
         passwordHash,
         isActive: true,
         image: demoAdmin.image,
+      })
+      await recordAudit({
+        action: 'Admin account created',
+        userId: createdAdmin._id,
+        userRole: 'Admin',
+        relatedRecordId: createdAdmin._id,
+        module: 'admins',
+        operationType: 'CREATE',
       })
       result.adminsCreated += 1
     }

@@ -2,10 +2,12 @@ import path from 'node:path'
 import fs from 'node:fs'
 import HealthReport from '../models/HealthReport.js'
 import Appointment from '../models/Appointment.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 const uploadDirectory = path.resolve(process.cwd(), 'uploads', 'reports')
 
 export const uploadHealthReport = async (req, res, next) => {
+  let reportSaved = false
   try {
     const { reportType, title, reportDate } = req.body ?? {}
     if (
@@ -32,9 +34,18 @@ export const uploadHealthReport = async (req, res, next) => {
       mimeType: req.file.mimetype,
       size: req.file.size,
     })
+    reportSaved = true
+    await recordAudit({
+      action: 'Health report uploaded',
+      userId: req.user._id,
+      userRole: 'Patient',
+      relatedRecordId: report._id,
+      module: 'healthReports',
+      operationType: 'CREATE',
+    })
     res.status(201).json(report)
   } catch (error) {
-    if (req.file) fs.unlink(req.file.path, () => {})
+    if (req.file && !reportSaved) fs.unlink(req.file.path, () => {})
     next(error)
   }
 }

@@ -4,6 +4,7 @@ import Patient from '../models/Patient.js'
 import DoctorAccount from '../models/DoctorAccount.js'
 import Admin from '../models/Admin.js'
 import { authCookieName, getJwtSecret } from '../config/auth.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 const sessionDurationMs = 8 * 60 * 60 * 1000
 const cookieOptions = () => ({
@@ -63,6 +64,15 @@ export const registerPatient = async (req, res, next) => {
       fullName: normalizedName,
       email: normalizedEmail,
       passwordHash,
+    })
+
+    await recordAudit({
+      action: 'Patient registered',
+      userId: patient._id,
+      userRole: 'Patient',
+      relatedRecordId: patient._id,
+      module: 'patients',
+      operationType: 'CREATE',
     })
 
     res.status(201).json({ user: toPublicUser(patient, 'Patient') })
@@ -187,6 +197,21 @@ export const updateProfile = async (req, res, next) => {
       { $set: updates },
       { new: true, runValidators: true },
     ).lean()
+
+    if (!account) {
+      return res.status(404).json({ message: 'Profile not found.' })
+    }
+
+    if (Object.keys(updates).length > 0 && ['Patient', 'Doctor'].includes(req.accountRole)) {
+      await recordAudit({
+        action: `${req.accountRole} profile updated`,
+        userId: req.user._id,
+        userRole: req.accountRole,
+        relatedRecordId: account._id,
+        module: req.accountRole === 'Patient' ? 'patients' : 'doctorAccounts',
+        operationType: 'UPDATE',
+      })
+    }
 
     res.json({ user: toPublicUser(account, req.accountRole) })
   } catch (error) {

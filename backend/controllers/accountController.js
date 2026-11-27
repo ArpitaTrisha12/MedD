@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import DoctorAccount from '../models/DoctorAccount.js'
 import Doctor from '../models/Doctor.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 export const listDoctorAccounts = async (_req, res, next) => {
   try {
@@ -51,6 +52,14 @@ export const createDoctorAccount = async (req, res, next) => {
       doctorId,
       isActive: true,
     })
+    await recordAudit({
+      action: 'Doctor account created',
+      userId: req.user._id,
+      userRole: 'Admin',
+      relatedRecordId: account._id,
+      module: 'doctorAccounts',
+      operationType: 'CREATE',
+    })
     res.status(201).json({
       _id: account._id,
       fullName: account.fullName,
@@ -86,6 +95,14 @@ export const updateDoctorAccount = async (req, res, next) => {
       .lean()
 
     if (!account) return res.status(404).json({ message: 'Doctor account not found.' })
+    await recordAudit({
+      action: 'Doctor account updated',
+      userId: req.user._id,
+      userRole: 'Admin',
+      relatedRecordId: account._id,
+      module: 'doctorAccounts',
+      operationType: 'UPDATE',
+    })
     res.json(account)
   } catch (error) {
     next(error)
@@ -96,6 +113,14 @@ export const deleteDoctorAccount = async (req, res, next) => {
   try {
     const account = await DoctorAccount.findByIdAndDelete(req.params.id).lean()
     if (!account) return res.status(404).json({ message: 'Doctor account not found.' })
+    await recordAudit({
+      action: 'Doctor account deleted',
+      userId: req.user._id,
+      userRole: 'Admin',
+      relatedRecordId: account._id,
+      module: 'doctorAccounts',
+      operationType: 'DELETE',
+    })
     res.status(204).end()
   } catch (error) {
     next(error)
