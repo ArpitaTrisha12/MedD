@@ -23,6 +23,7 @@ import {
   fetchDoctorAccounts,
   updateDoctorAccount,
 } from '../services/accountApi'
+import { formatTime12Hour } from '../utils/formatTime'
 import './Dashboard.css'
 
 const WEEK_DAYS = [
@@ -330,7 +331,9 @@ const Dashboard = () => {
           ) : (
             dashboard.recentAppointments.map((appointment) => (
               <div className="dashboard-appointment-row" key={appointment._id}>
-                <strong>{appointment.appointmentDate} at {appointment.appointmentTime}</strong>
+                <strong>
+                  {appointment.appointmentDate} at {formatTime12Hour(appointment.appointmentTime)}
+                </strong>
                 <span>{appointment.status}</span>
                 {dashboard.role === 'Doctor' && appointment.status === 'Pending' && (
                   <button type="button" onClick={() => confirmPendingAppointment(appointment._id)}>

@@ -30,3 +30,10 @@ export const fetchPayment = async (paymentId, signal) => {
   )
   return data
 }
+
+export const resolvePayment = async (paymentId) => {
+  const { data } = await paymentClient.post(
+    `/api/payments/${encodeURIComponent(paymentId)}/resolve`,
+  )
+  return data
+}

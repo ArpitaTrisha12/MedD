@@ -7,6 +7,7 @@ import {
   fetchAppointmentAvailability,
 } from '../services/appointmentApi'
 import { initiatePayment } from '../services/paymentApi'
+import { formatTime12Hour } from '../utils/formatTime'
 import './Appointment.css'
 
 const PAYMENT_METHODS = [
@@ -224,7 +225,7 @@ const Appointment = () => {
               <div className="appointment-payment-confirmation">
                 <span>BOOKING CONFIRMED</span>
                 <h3>Appointment booked</h3>
-                <p>{success.appointmentDate} at {success.appointmentTime}</p>
+                <p>{success.appointmentDate} at {formatTime12Hour(success.appointmentTime)}</p>
               </div>
 
               <section className="payment-selection" aria-labelledby="payment-selection-title">
@@ -364,7 +365,7 @@ const Appointment = () => {
                         className={time === slot ? 'selected' : ''}
                         onClick={() => setTime(slot)}
                       >
-                        {slot}
+                        {formatTime12Hour(slot)}
                       </button>
                     ))}
                   </div>

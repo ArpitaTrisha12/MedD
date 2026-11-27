@@ -5,7 +5,9 @@ import AuditLog from '../models/AuditLog.js'
 import Payment from '../models/Payment.js'
 import {
   handleSslCommerzSuccess,
+  handleSslCommerzUnsuccessfulReturn,
   initiatePayment,
+  resolveMyPayment,
 } from '../controllers/paymentController.js'
 
 const createResponse = () => ({
@@ -65,9 +67,25 @@ test('Payment schema stores safe payment references in the payments collection',
   assert.equal(Payment.collection.name, 'payments')
   assert.equal(Payment.schema.path('patient') !== undefined, true)
   assert.equal(Payment.schema.path('appointment') !== undefined, true)
-  assert.equal(Payment.schema.path('status').enumValues.join(','), 'Pending,Paid,Failed')
+  assert.equal(
+    Payment.schema.path('status').enumValues.join(','),
+    'Pending,Paid,Failed,Cancelled',
+  )
+  assert.equal(Payment.schema.path('gatewaySessionId').options.select, false)
   assert.equal(Payment.schema.path('cardNumber'), undefined)
   assert.equal(Payment.schema.path('cvv'), undefined)
+  const activePaymentIndex = Payment.schema.indexes().find(
+    ([, options]) => options.name === 'appointment_single_active_payment',
+  )
+  assert.deepEqual(activePaymentIndex[1].partialFilterExpression, {
+    status: { $in: ['Pending', 'Paid'] },
+  })
+  assert.equal(
+    Payment.schema.indexes().some(([, options]) =>
+      options.partialFilterExpression?.status === 'Pending',
+    ),
+    false,
+  )
 })
 
 test('AuditLog accepts payment activity records', () => {
@@ -127,6 +145,7 @@ test('checkout uses the appointment fee and selected SSLCOMMERZ channel', async 
         json: async () => ({
           status: 'SUCCESS',
           GatewayPageURL: 'https://sandbox.sslcommerz.com/gwprocess/v4/test-session',
+          sessionkey: 'provider-session-reference',
         }),
       }
     }
@@ -154,6 +173,7 @@ test('checkout uses the appointment fee and selected SSLCOMMERZ channel', async 
 
       assert.equal(createdPayment.amount, 700)
       assert.equal(createdPayment.status, 'Pending')
+      assert.equal(createdPayment.gatewaySessionId, 'provider-session-reference')
       assert.equal(formFields.get('total_amount'), '700.00')
       assert.equal(formFields.get('multi_card_name'), 'bkash')
       assert.equal(formFields.get('store_passwd'), 'test-secret')
@@ -169,6 +189,346 @@ test('checkout uses the appointment fee and selected SSLCOMMERZ channel', async 
     }
   })
 })
+
+  test('status resolution marks Paid only after query and transaction validation', async () => {
+    await withPaymentEnvironment(async () => {
+      const originals = {
+        paymentFindOne: Payment.findOne,
+        paymentFindOneAndUpdate: Payment.findOneAndUpdate,
+        auditCreate: AuditLog.create,
+        fetch: globalThis.fetch,
+      }
+      const payment = {
+        _id: '507f1f77bcf86cd799439013',
+        patient: '507f1f77bcf86cd799439011',
+        appointment: '507f1f77bcf86cd799439012',
+        amount: 700,
+        currency: 'BDT',
+        status: 'Pending',
+        method: 'bkash',
+        merchantTransactionId: 'MDtransaction',
+        gatewaySessionId: 'provider-session-reference',
+      }
+      let auditEntry
+      Payment.findOne = () => ({ select: async () => payment })
+      Payment.findOneAndUpdate = async (_filter, update) => {
+        Object.assign(payment, update.$set)
+        return payment
+      }
+      AuditLog.create = async (entry) => {
+        auditEntry = entry
+        return entry
+      }
+      globalThis.fetch = async (url) => {
+        if (url.includes('merchantTransIDvalidationAPI.php')) {
+          return {
+            ok: true,
+            json: async () => ({
+              APIConnect: 'DONE',
+              sessionkey: payment.gatewaySessionId,
+              tran_id: payment.merchantTransactionId,
+              amount: '700.00',
+              currency: 'BDT',
+              status: 'VALID',
+              val_id: 'gateway-validation-id',
+            }),
+          }
+        }
+        return {
+          ok: true,
+          json: async () => ({
+            status: 'VALID',
+            tran_id: payment.merchantTransactionId,
+            amount: '700.00',
+            currency: 'BDT',
+            risk_level: '0',
+            val_id: 'gateway-validation-id',
+          }),
+        }
+      }
+
+      try {
+        const res = createResponse()
+        await resolveMyPayment(
+          {
+            params: { id: payment._id },
+            user: { _id: payment.patient },
+          },
+          res,
+          (error) => { throw error },
+        )
+        assert.equal(payment.status, 'Paid')
+        assert.equal(res.body.status, 'Paid')
+        assert.equal(auditEntry.action, 'Payment verified')
+      } finally {
+        Payment.findOne = originals.paymentFindOne
+        Payment.findOneAndUpdate = originals.paymentFindOneAndUpdate
+        AuditLog.create = originals.auditCreate
+        globalThis.fetch = originals.fetch
+      }
+    })
+  })
+
+  for (const providerStatus of ['FAILED', 'CANCELLED']) {
+    test(`unsuccessful return resolves provider-confirmed ${providerStatus.toLowerCase()} status`, async () => {
+      await withPaymentEnvironment(async () => {
+        const originals = {
+          paymentFindOne: Payment.findOne,
+          paymentFindOneAndUpdate: Payment.findOneAndUpdate,
+          auditCreate: AuditLog.create,
+          fetch: globalThis.fetch,
+        }
+        const payment = {
+          _id: '507f1f77bcf86cd799439013',
+          patient: '507f1f77bcf86cd799439011',
+          amount: 700,
+          currency: 'BDT',
+          status: 'Pending',
+          merchantTransactionId: 'MDtransaction',
+          gatewaySessionId: 'provider-session-reference',
+        }
+        let auditEntry
+        Payment.findOne = () => ({ select: async () => payment })
+        Payment.findOneAndUpdate = async (_filter, update) => {
+          Object.assign(payment, update.$set)
+          return payment
+        }
+        AuditLog.create = async (entry) => {
+          auditEntry = entry
+          return entry
+        }
+        globalThis.fetch = async (url) => {
+          assert.match(url, /merchantTransIDvalidationAPI\.php\?/)
+          assert.match(url, /sessionkey=provider-session-reference/)
+          return {
+            ok: true,
+            json: async () => ({
+              APIConnect: 'DONE',
+              sessionkey: payment.gatewaySessionId,
+              tran_id: payment.merchantTransactionId,
+              amount: '700.00',
+              currency: 'BDT',
+              status: providerStatus,
+            }),
+          }
+        }
+
+        try {
+          const res = createResponse()
+          await handleSslCommerzUnsuccessfulReturn(
+            {
+              body: {
+                tran_id: payment.merchantTransactionId,
+                status: providerStatus === 'FAILED' ? 'CANCELLED' : 'FAILED',
+              },
+            },
+            res,
+            (error) => { throw error },
+          )
+
+          assert.equal(
+            payment.status,
+            providerStatus === 'FAILED' ? 'Failed' : 'Cancelled',
+          )
+          assert.equal(res.redirectCode, 303)
+          assert.equal(
+            auditEntry.action,
+            providerStatus === 'FAILED' ? 'Payment failed' : 'Payment cancelled',
+          )
+        } finally {
+          Payment.findOne = originals.paymentFindOne
+          Payment.findOneAndUpdate = originals.paymentFindOneAndUpdate
+          AuditLog.create = originals.auditCreate
+          globalThis.fetch = originals.fetch
+        }
+      })
+    })
+  }
+
+  test('unverified browser cancellation does not change a provider-pending payment', async () => {
+    await withPaymentEnvironment(async () => {
+      const originals = {
+        paymentFindOne: Payment.findOne,
+        paymentFindOneAndUpdate: Payment.findOneAndUpdate,
+        fetch: globalThis.fetch,
+      }
+      const payment = {
+        _id: '507f1f77bcf86cd799439013',
+        patient: '507f1f77bcf86cd799439011',
+        amount: 700,
+        currency: 'BDT',
+        status: 'Pending',
+        merchantTransactionId: 'MDtransaction',
+        gatewaySessionId: 'provider-session-reference',
+      }
+      let statusUpdateAttempted = false
+      Payment.findOne = () => ({ select: async () => payment })
+      Payment.findOneAndUpdate = async () => {
+        statusUpdateAttempted = true
+        return null
+      }
+      globalThis.fetch = async () => ({
+        ok: true,
+        json: async () => ({
+          APIConnect: 'DONE',
+          sessionkey: payment.gatewaySessionId,
+          tran_id: payment.merchantTransactionId,
+          amount: '700.00',
+          currency: 'BDT',
+          status: 'PENDING',
+        }),
+      })
+
+      try {
+        const res = createResponse()
+        await handleSslCommerzUnsuccessfulReturn(
+          {
+            body: {
+              tran_id: payment.merchantTransactionId,
+              status: 'CANCELLED',
+            },
+          },
+          res,
+          (error) => { throw error },
+        )
+        assert.equal(payment.status, 'Pending')
+        assert.equal(statusUpdateAttempted, false)
+        assert.equal(res.redirectCode, 303)
+      } finally {
+        Payment.findOne = originals.paymentFindOne
+        Payment.findOneAndUpdate = originals.paymentFindOneAndUpdate
+        globalThis.fetch = originals.fetch
+      }
+    })
+  })
+
+  test('a provider-confirmed failed attempt allows a new checkout attempt', async () => {
+    await withPaymentEnvironment(async () => {
+      const originals = {
+        appointmentFindOne: Appointment.findOne,
+        paymentFindOne: Payment.findOne,
+        paymentCreate: Payment.create,
+        auditCreate: AuditLog.create,
+        fetch: globalThis.fetch,
+      }
+      const appointment = {
+        _id: '507f1f77bcf86cd799439012',
+        fee: 700,
+        status: 'Pending',
+      }
+      const previousAttempt = { status: 'Failed' }
+      let newPayment
+      Appointment.findOne = async () => appointment
+      Payment.findOne = (filter) => {
+        if (filter.status === 'Paid') {
+          return { lean: async () => null }
+        }
+        return null
+      }
+      Payment.create = async (document) => {
+        newPayment = {
+          ...document,
+          _id: '507f1f77bcf86cd799439014',
+          save: async () => {},
+        }
+        return newPayment
+      }
+      AuditLog.create = async (entry) => entry
+      globalThis.fetch = async () => ({
+        ok: true,
+        json: async () => ({
+          status: 'SUCCESS',
+          GatewayPageURL: 'https://sandbox.sslcommerz.com/gwprocess/v4/retry-session',
+          sessionkey: 'new-provider-session-reference',
+        }),
+      })
+
+      try {
+        const res = createResponse()
+        await initiatePayment(
+          {
+            body: {
+              appointmentId: appointment._id,
+              method: 'bkash',
+            },
+            user: {
+              _id: '507f1f77bcf86cd799439011',
+              fullName: 'Patient Name',
+              email: 'patient@example.test',
+              phone: '01700000000',
+              address: '',
+            },
+          },
+          res,
+          (error) => { throw error },
+        )
+        assert.equal(previousAttempt.status, 'Failed')
+        assert.equal(newPayment.status, 'Pending')
+        assert.equal(newPayment.amount, 700)
+        assert.equal(newPayment.gatewaySessionId, 'new-provider-session-reference')
+        assert.equal(res.statusCode, 201)
+        assert.match(res.body.checkoutUrl, /retry-session/)
+      } finally {
+        Appointment.findOne = originals.appointmentFindOne
+        Payment.findOne = originals.paymentFindOne
+        Payment.create = originals.paymentCreate
+        AuditLog.create = originals.auditCreate
+        globalThis.fetch = originals.fetch
+      }
+    })
+  })
+
+  test('checkout blocks a second successful payment for the same appointment', async () => {
+    await withPaymentEnvironment(async () => {
+      const originals = {
+        appointmentFindOne: Appointment.findOne,
+        paymentFindOne: Payment.findOne,
+        paymentCreate: Payment.create,
+      }
+      const appointment = {
+        _id: '507f1f77bcf86cd799439012',
+        fee: 700,
+        status: 'Pending',
+      }
+      let created = false
+      Appointment.findOne = async () => appointment
+      Payment.findOne = (filter) => {
+        assert.equal(filter.appointment, appointment._id)
+        if (filter.status === 'Paid') {
+          return { lean: async () => ({ _id: 'existing-paid-payment' }) }
+        }
+        return null
+      }
+      Payment.create = async () => { created = true }
+
+      try {
+        const res = createResponse()
+        await initiatePayment(
+          {
+            body: {
+              appointmentId: appointment._id,
+              method: 'bkash',
+            },
+            user: {
+              _id: '507f1f77bcf86cd799439011',
+              fullName: 'Patient Name',
+              email: 'patient@example.test',
+              phone: '01700000000',
+              address: '',
+            },
+          },
+          res,
+          (error) => { throw error },
+        )
+        assert.equal(res.statusCode, 409)
+        assert.equal(created, false)
+      } finally {
+        Appointment.findOne = originals.appointmentFindOne
+        Payment.findOne = originals.paymentFindOne
+        Payment.create = originals.paymentCreate
+      }
+    })
+  })
 
 test('checkout does not write a payment when SSLCOMMERZ is not configured', async () => {
   const originals = {

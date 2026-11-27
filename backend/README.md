@@ -99,12 +99,21 @@ card numbers, CVV, passwords, or gateway credentials.
   `card` (`cardBrand` must be `visa` or `mastercard`).
 - `GET /api/payments/mine` and `GET /api/payments/:id` (Patient) return only
   the signed-in patient's payment history.
+- `POST /api/payments/:id/resolve` (Patient) checks a pending attempt against
+  SSLCOMMERZ's authenticated transaction-query API. It changes status only
+  after matching the stored session, transaction reference, amount, and BDT
+  currency; successful statuses also pass the existing order-validation checks.
+- Browser fail/cancel redirects are not trusted as payment status. A retry is
+  permitted only after an attempt is recorded as Failed or Cancelled; Pending
+  attempts stay blocked until the provider confirms a terminal outcome. A
+  database unique index permits at most one Pending or Paid attempt per
+  appointment.
 - SSLCOMMERZ posts to `/api/payments/sslcommerz/success`, `/fail`, `/cancel`,
   and `/ipn`. Paid status is set only after server-side order validation
   confirms the transaction reference, amount, BDT currency, and non-risky
   validation status.
-- Payment initiation, definitive gateway-initiation failure, and verified-payment
-  events are written to `auditlogs`.
+- Payment initiation, definitive gateway-initiation failure, provider-confirmed
+  failure/cancellation, and verified-payment events are written to `auditlogs`.
 - Configure `SSLCOMMERZ_MODE`, `SSLCOMMERZ_STORE_ID`,
   `SSLCOMMERZ_STORE_PASSWORD`, and `PAYMENT_CALLBACK_BASE_URL` in the backend
   `.env`. The callback URL must be publicly reachable over HTTPS outside local

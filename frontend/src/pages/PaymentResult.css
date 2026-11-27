@@ -47,6 +47,11 @@
   color: #b42318;
 }
 
+.payment-result-status.cancelled {
+  background: #fff0ef;
+  color: #b42318;
+}
+
 .payment-result-error {
   color: #b42318;
 }
@@ -77,7 +82,8 @@
   overflow-wrap: anywhere;
 }
 
-.payment-result-card > a {
+.payment-result-card > a,
+.payment-result-action {
   display: inline-flex;
   margin-top: 12px;
   padding: 12px 18px;
@@ -88,6 +94,13 @@
   text-decoration: none;
 }
 
-.payment-result-card > a:hover {
+.payment-result-action {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.payment-result-card > a:hover,
+.payment-result-action:hover {
   background: #095e57;
 }

@@ -218,6 +218,32 @@
   color: #b42318 !important;
 }
 
+.payment-status-badge.cancelled {
+  background: #fff0ef;
+  color: #b42318 !important;
+}
+
+.payment-history-actions {
+  grid-column: 1 / -1;
+}
+
+.payment-history-actions button {
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 7px;
+  background: #0c766d;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.payment-history-actions button:disabled,
+.payment-result-action:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .my-appointment-actions,
 .reschedule-panel {
   grid-column: 1 / -1;

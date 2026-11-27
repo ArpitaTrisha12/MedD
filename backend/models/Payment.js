@@ -72,10 +72,6 @@ paymentSchema.index({ patient: 1, createdAt: -1 })
 paymentSchema.index({ appointment: 1, status: 1 })
 paymentSchema.index(
   { appointment: 1 },
-  { unique: true, partialFilterExpression: { status: 'Pending' } },
-)
-paymentSchema.index(
-  { appointment: 1 },
   {
     unique: true,
     partialFilterExpression: { status: { $in: ['Pending', 'Paid'] } },

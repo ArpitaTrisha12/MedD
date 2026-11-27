@@ -6,7 +6,8 @@ import {
   fetchMyAppointments,
   rescheduleAppointment,
 } from '../services/appointmentApi'
-import { fetchMyPayments } from '../services/paymentApi'
+import { fetchMyPayments, initiatePayment, resolvePayment } from '../services/paymentApi'
+import { formatTime12Hour } from '../utils/formatTime'
 import './MyAppointments.css'
 
 const statusClass = (status) => status.toLowerCase()
@@ -23,6 +24,7 @@ const MyAppointments = () => {
   const [payments, setPayments] = useState([])
   const [paymentsLoading, setPaymentsLoading] = useState(true)
   const [paymentsError, setPaymentsError] = useState('')
+  const [paymentActionId, setPaymentActionId] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -132,6 +134,47 @@ const MyAppointments = () => {
     }
   }
 
+  const handleResolvePayment = async (payment) => {
+    setActionError('')
+    setPaymentActionId(payment._id)
+    try {
+      const updated = await resolvePayment(payment._id)
+      setPayments((current) =>
+        current.map((item) =>
+          item._id === payment._id ? { ...item, status: updated.status } : item,
+        ),
+      )
+    } catch (requestError) {
+      setActionError(requestError.response?.data?.message || 'Unable to verify payment status.')
+    } finally {
+      setPaymentActionId('')
+    }
+  }
+
+  const handleRetryPayment = async (payment) => {
+    if (payment.method === 'nagad') {
+      setActionError('Nagad checkout is unavailable until its official integration is configured.')
+      return
+    }
+    setActionError('')
+    setPaymentActionId(payment._id)
+    try {
+      const appointmentId = typeof payment.appointment === 'object'
+        ? payment.appointment?._id
+        : payment.appointment
+      const checkout = await initiatePayment({
+        appointmentId,
+        method: payment.method,
+        cardBrand: payment.cardBrand,
+      })
+      window.location.assign(checkout.checkoutUrl)
+    } catch (requestError) {
+      setActionError(requestError.response?.data?.message || 'Unable to retry payment.')
+    } finally {
+      setPaymentActionId('')
+    }
+  }
+
   return (
     <div className="my-appointments-page">
       <div className="my-appointments-heading">
@@ -195,6 +238,29 @@ const MyAppointments = () => {
                 <span className={`payment-status-badge ${statusClass(payment.status)}`}>
                   {payment.status}
                 </span>
+                {(payment.status === 'Pending' ||
+                  payment.status === 'Failed' ||
+                  payment.status === 'Cancelled') && (
+                  <div className="payment-history-actions">
+                    {payment.status === 'Pending' ? (
+                      <button
+                        type="button"
+                        disabled={paymentActionId === payment._id}
+                        onClick={() => handleResolvePayment(payment)}
+                      >
+                        {paymentActionId === payment._id ? 'Checking...' : 'Check status'}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={paymentActionId === payment._id}
+                        onClick={() => handleRetryPayment(payment)}
+                      >
+                        {paymentActionId === payment._id ? 'Starting...' : 'Retry payment'}
+                      </button>
+                    )}
+                  </div>
+                )}
               </article>
             ))}
           </div>
@@ -240,7 +306,7 @@ const MyAppointments = () => {
                 </div>
                 <div>
                   <span>Time</span>
-                  <strong>{appointment.appointmentTime}</strong>
+                  <strong>{formatTime12Hour(appointment.appointmentTime)}</strong>
                 </div>
                 <div>
                   <span>Fee</span>
@@ -281,7 +347,7 @@ const MyAppointments = () => {
                           className={rescheduleTime === slot ? 'selected' : ''}
                           onClick={() => setRescheduleTime(slot)}
                         >
-                          {slot}
+                          {formatTime12Hour(slot)}
                         </button>
                       ))}
                     </div>

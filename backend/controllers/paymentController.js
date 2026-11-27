@@ -7,6 +7,7 @@ import {
   createSslCommerzSession,
   isSslCommerzConfigured,
   PaymentGatewayError,
+  querySslCommerzSession,
   validateSslCommerzTransaction,
 } from '../services/sslCommerzService.js'
 
@@ -19,6 +20,29 @@ const resultUrl = (paymentId) => {
 }
 
 const respondToCallback = (res, paymentId) => res.redirect(303, resultUrl(paymentId))
+
+const recordPaymentStatusChange = async (payment, status) => {
+  const updatedPayment = await Payment.findOneAndUpdate(
+    { _id: payment._id, status: 'Pending' },
+    { $set: { status } },
+    { new: true },
+  )
+
+  if (updatedPayment) {
+    await recordAudit({
+      action: status === 'Cancelled' ? 'Payment cancelled' : 'Payment failed',
+      userId: payment.patient,
+      userRole: 'Patient',
+      relatedRecordId: payment._id,
+      module: 'payments',
+      operationType: 'UPDATE',
+    })
+    return status
+  }
+
+  const latestPayment = await Payment.findById(payment._id).select('status').lean()
+  return latestPayment?.status || payment.status
+}
 
 const updateVerifiedPayment = async (payment, validation) => {
   const validStatus = ['VALID', 'VALIDATED'].includes(validation.status)
@@ -64,6 +88,57 @@ const updateVerifiedPayment = async (payment, validation) => {
 
   const latestPayment = await Payment.findById(payment._id).select('status').lean()
   return latestPayment?.status === 'Paid'
+}
+
+const resolveSslCommerzPayment = async (payment) => {
+  if (payment.status !== 'Pending') {
+    return payment.status
+  }
+  if (!payment.gatewaySessionId) {
+    throw new PaymentGatewayError(
+      'The provider session reference is unavailable. Check payment status again later.',
+    )
+  }
+
+  const providerStatus = await querySslCommerzSession(payment.gatewaySessionId)
+  if (!providerStatus || typeof providerStatus !== 'object') {
+    throw new PaymentGatewayError('The provider returned an invalid status response.')
+  }
+  const responseCurrency = providerStatus.currency || providerStatus.currency_type
+  const responseMatchesPayment =
+    providerStatus.APIConnect === 'DONE' &&
+    providerStatus.sessionkey === payment.gatewaySessionId &&
+    providerStatus.tran_id === payment.merchantTransactionId &&
+    Number(providerStatus.amount) === payment.amount &&
+    responseCurrency === payment.currency
+
+  if (!responseMatchesPayment) {
+    throw new PaymentGatewayError('The provider could not confirm this payment attempt.')
+  }
+
+  const status = String(providerStatus.status || '').toUpperCase()
+  if (status === 'VALID' || status === 'VALIDATED') {
+    if (typeof providerStatus.val_id !== 'string' || providerStatus.val_id.length > 100) {
+      throw new PaymentGatewayError('The provider returned an invalid validation reference.')
+    }
+
+    const validation = await validateSslCommerzTransaction(providerStatus.val_id)
+    if (!(await updateVerifiedPayment(payment, validation))) {
+      throw new PaymentGatewayError('The provider could not verify this payment.')
+    }
+    return 'Paid'
+  }
+  if (status === 'FAILED') {
+    return recordPaymentStatusChange(payment, 'Failed')
+  }
+  if (status === 'CANCELLED' || status === 'CANCELED') {
+    return recordPaymentStatusChange(payment, 'Cancelled')
+  }
+  if (status === 'PENDING') {
+    return 'Pending'
+  }
+
+  throw new PaymentGatewayError('The provider returned an unsupported payment status.')
 }
 
 export const initiatePayment = async (req, res, next) => {
@@ -172,6 +247,16 @@ export const initiatePayment = async (req, res, next) => {
       session = await createSslCommerzSession({ payment, patient: req.user })
     } catch (error) {
       if (error instanceof PaymentGatewayError) {
+        payment.status = 'Failed'
+        await payment.save()
+        await recordAudit({
+          action: 'Payment failed',
+          userId: req.user._id,
+          userRole: 'Patient',
+          relatedRecordId: payment._id,
+          module: 'payments',
+          operationType: 'UPDATE',
+        })
         return res.status(error.statusCode).json({ message: error.message })
       }
       throw error
@@ -190,6 +275,9 @@ export const initiatePayment = async (req, res, next) => {
       })
       return res.status(502).json({ message: 'The payment provider could not start checkout.' })
     }
+
+    payment.gatewaySessionId = session.sessionKey
+    await payment.save()
 
     res.status(201).json({
       payment: {
@@ -245,10 +333,13 @@ const getPendingSslCommerzPayment = async (transactionId) => {
   if (typeof transactionId !== 'string' || transactionId.length > 30) {
     return null
   }
-  return Payment.findOne({
+  const query = Payment.findOne({
     merchantTransactionId: transactionId,
     provider: 'sslcommerz',
   })
+  return typeof query.select === 'function'
+    ? query.select('+gatewaySessionId')
+    : query
 }
 
 export const handleSslCommerzSuccess = async (req, res, next) => {
@@ -300,8 +391,40 @@ export const handleSslCommerzUnsuccessfulReturn = async (req, res, next) => {
     if (!payment) {
       return res.status(400).send('Payment reference was not found.')
     }
+    await resolveSslCommerzPayment(payment)
     respondToCallback(res, payment._id)
   } catch (error) {
+    if (error instanceof PaymentGatewayError) {
+      return res.status(error.statusCode).send('Payment status could not be confirmed.')
+    }
+    next(error)
+  }
+}
+
+export const resolveMyPayment = async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ message: 'Payment not found.' })
+    }
+
+    const query = Payment.findOne({
+      _id: req.params.id,
+      patient: req.user._id,
+    })
+    const payment = await (typeof query.select === 'function'
+      ? query.select('+gatewaySessionId')
+      : query)
+
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment not found.' })
+    }
+
+    const status = await resolveSslCommerzPayment(payment)
+    res.json({ _id: payment._id, status })
+  } catch (error) {
+    if (error instanceof PaymentGatewayError) {
+      return res.status(error.statusCode).json({ message: error.message })
+    }
     next(error)
   }
 }
