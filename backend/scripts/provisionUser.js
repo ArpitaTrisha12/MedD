@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import connectDB from '../config/db.js'
 import DoctorAccount from '../models/DoctorAccount.js'
 import Doctor from '../models/Doctor.js'
+import { recordAudit } from '../services/auditLogService.js'
 
 const provisionUser = async () => {
   const fullName = process.env.PROVISION_NAME?.trim()
@@ -40,7 +41,15 @@ const provisionUser = async () => {
       throw new Error('This doctor profile already has a login account.')
     }
     const passwordHash = await bcrypt.hash(password, 12)
-    await DoctorAccount.create({ fullName, email, passwordHash, doctorId })
+    const account = await DoctorAccount.create({ fullName, email, passwordHash, doctorId })
+    await recordAudit({
+      action: 'Doctor account created',
+      userId: account._id,
+      userRole: 'Doctor',
+      relatedRecordId: account._id,
+      module: 'doctorAccounts',
+      operationType: 'CREATE',
+    })
     console.log('Doctor account provisioned.')
   } finally {
     await mongoose.disconnect()

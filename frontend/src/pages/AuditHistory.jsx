@@ -16,35 +16,40 @@ const AuditHistory = () => {
   const [filters, setFilters] = useState(emptyFilters)
   const [appliedFilters, setAppliedFilters] = useState(emptyFilters)
   const [page, setPage] = useState(1)
-  const [history, setHistory] = useState({ items: [], total: 0, pages: 0 })
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [result, setResult] = useState({
+    requestKey: '',
+    history: { items: [], total: 0, pages: 0 },
+    error: '',
+  })
+  const params = {
+    page,
+    limit: PAGE_SIZE,
+    ...Object.fromEntries(
+      Object.entries(appliedFilters).filter(([, value]) => value),
+    ),
+  }
+  const requestKey = JSON.stringify(params)
 
   useEffect(() => {
     const controller = new AbortController()
-    const params = {
-      page,
-      limit: PAGE_SIZE,
-      ...Object.fromEntries(
-        Object.entries(appliedFilters).filter(([, value]) => value),
-      ),
-    }
-
-    setLoading(true)
-    setError('')
-    fetchAuditHistory(params, controller.signal)
-      .then(setHistory)
+    fetchAuditHistory(JSON.parse(requestKey), controller.signal)
+      .then((history) => setResult({ requestKey, history, error: '' }))
       .catch((requestError) => {
         if (requestError.code !== 'ERR_CANCELED') {
-          setError(requestError.response?.data?.message || 'Unable to load audit history.')
+          setResult({
+            requestKey,
+            history: { items: [], total: 0, pages: 0 },
+            error: requestError.response?.data?.message || 'Unable to load audit history.',
+          })
         }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false)
       })
 
     return () => controller.abort()
-  }, [appliedFilters, page])
+  }, [requestKey])
+
+  const loading = result.requestKey !== requestKey
+  const history = loading ? { items: [], total: 0, pages: 0 } : result.history
+  const error = loading ? '' : result.error
 
   const applyFilters = (event) => {
     event.preventDefault()

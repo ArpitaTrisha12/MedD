@@ -6,7 +6,14 @@ import {
   createAppointment,
   fetchAppointmentAvailability,
 } from '../services/appointmentApi'
+import { initiatePayment } from '../services/paymentApi'
 import './Appointment.css'
+
+const PAYMENT_METHODS = [
+  { id: 'bkash', name: 'bKash', logo: '/payment-logos/bkash.svg' },
+  { id: 'nagad', name: 'Nagad', logo: '/payment-logos/nagad.svg' },
+  { id: 'card', name: 'Credit/Debit Card' },
+]
 
 const WEEK_DAYS = [
   { day: 6, name: 'Saturday' },
@@ -39,6 +46,10 @@ const Appointment = () => {
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState('')
   const [success, setSuccess] = useState(null)
+  const [selectedMethod, setSelectedMethod] = useState('bkash')
+  const [cardBrand, setCardBrand] = useState('visa')
+  const [paymentError, setPaymentError] = useState('')
+  const [startingPayment, setStartingPayment] = useState(false)
 
   const minimumDate = useMemo(
     () => formatDateInput(addDays(new Date(), 7)),
@@ -125,6 +136,33 @@ const Appointment = () => {
     }
   }
 
+  const startPayment = async () => {
+    setPaymentError('')
+    if (selectedMethod === 'nagad') {
+      setPaymentError(
+        'Nagad checkout is not available until its official merchant integration is configured.',
+      )
+      return
+    }
+
+    setStartingPayment(true)
+    try {
+      const checkout = await initiatePayment({
+        appointmentId: success._id,
+        method: selectedMethod,
+        ...(selectedMethod === 'card' ? { cardBrand } : {}),
+      })
+      window.location.assign(checkout.checkoutUrl)
+    } catch (error) {
+      setPaymentError(
+        error.response?.data?.message ||
+        'Unable to start secure checkout. Your appointment remains booked.',
+      )
+    } finally {
+      setStartingPayment(false)
+    }
+  }
+
   if (loadingDoctor) {
     return <p className="appointment-status" role="status">Loading doctor details...</p>
   }
@@ -183,15 +221,108 @@ const Appointment = () => {
 
           {success ? (
             <div className="appointment-success" role="status">
-              <h3>Appointment booked</h3>
-              <p>
-                {success.appointmentDate} at {success.appointmentTime}
-              </p>
-              <p>
-                Fee: ৳{success.fee}
-                {success.discountApplied ? ' (৳300 returning-patient discount)' : ''}
-              </p>
-              <button type="button" onClick={() => navigate('/my-appointments')}>
+              <div className="appointment-payment-confirmation">
+                <span>BOOKING CONFIRMED</span>
+                <h3>Appointment booked</h3>
+                <p>{success.appointmentDate} at {success.appointmentTime}</p>
+              </div>
+
+              <section className="payment-selection" aria-labelledby="payment-selection-title">
+                <div className="payment-selection-heading">
+                  <div>
+                    <span>SECURE CHECKOUT</span>
+                    <h3 id="payment-selection-title">Choose a payment method</h3>
+                  </div>
+                  <span className="payment-pending-pill">Payment not started</span>
+                </div>
+
+                <div className="payment-method-grid">
+                  {PAYMENT_METHODS.map((method) => (
+                    <button
+                      type="button"
+                      key={method.id}
+                      className={`payment-method-card ${selectedMethod === method.id ? 'selected' : ''}`}
+                      aria-pressed={selectedMethod === method.id}
+                      onClick={() => {
+                        setSelectedMethod(method.id)
+                        setPaymentError('')
+                      }}
+                    >
+                      {method.logo ? (
+                        <img src={method.logo} alt={`${method.name} logo`} />
+                      ) : (
+                        <div className="payment-card-logos" aria-label="Visa and Mastercard">
+                          <img src="/payment-logos/visa.svg" alt="Visa logo" />
+                          <img src="/payment-logos/mastercard.svg" alt="Mastercard logo" />
+                        </div>
+                      )}
+                      <span className="payment-method-name">{method.name}</span>
+                      <span className="payment-method-radio" aria-hidden="true">
+                        {selectedMethod === method.id ? '✓' : ''}
+                      </span>
+                      {method.id === 'nagad' && (
+                        <span className="payment-method-note">Setup pending</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {selectedMethod === 'card' && (
+                  <fieldset className="payment-card-brand">
+                    <legend>Choose card network</legend>
+                    {[
+                      { value: 'visa', label: 'Visa', logo: '/payment-logos/visa.svg' },
+                      { value: 'mastercard', label: 'Mastercard', logo: '/payment-logos/mastercard.svg' },
+                    ].map((brand) => (
+                      <label key={brand.value} className={cardBrand === brand.value ? 'selected' : ''}>
+                        <input
+                          type="radio"
+                          name="card-brand"
+                          value={brand.value}
+                          checked={cardBrand === brand.value}
+                          onChange={() => setCardBrand(brand.value)}
+                        />
+                        <img src={brand.logo} alt="" />
+                        <span>{brand.label}</span>
+                      </label>
+                    ))}
+                  </fieldset>
+                )}
+
+                <div className="payment-summary">
+                  <div><span>Consultation fee</span><strong>৳1,000</strong></div>
+                  {success.discountApplied && (
+                    <div className="payment-discount-line">
+                      <span>Returning-patient discount</span><strong>−৳300</strong>
+                    </div>
+                  )}
+                  <div className="payment-total">
+                    <span>Amount due</span><strong>৳{success.fee}</strong>
+                  </div>
+                </div>
+
+                {paymentError && (
+                  <p className="payment-init-error" role="alert">{paymentError}</p>
+                )}
+                <p className="payment-security-note">
+                  Card details are entered only on the payment provider’s secure checkout.
+                  MedD does not store card numbers or CVV.
+                </p>
+                <button
+                  type="button"
+                  className="appointment-submit payment-continue"
+                  onClick={startPayment}
+                  disabled={startingPayment || selectedMethod === 'nagad'}
+                >
+                  {startingPayment ? 'Connecting to provider...' : 'Continue to secure payment'}
+                </button>
+              </section>
+
+              <button
+                type="button"
+                className="appointment-view-bookings"
+                onClick={() => navigate('/my-appointments')}
+              >
                 View My Appointments
               </button>
             </div>

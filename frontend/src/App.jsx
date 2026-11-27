@@ -13,6 +13,7 @@ import useAuth from './context/useAuth'
 import ProfileSetup from './pages/ProfileSetup'
 import Dashboard from './pages/Dashboard'
 import AuditHistory from './pages/AuditHistory'
+import PaymentResult from './pages/PaymentResult'
 
 const ProtectedRoute = ({ children, roles }) => {
   const location = useLocation()
@@ -140,6 +141,15 @@ const App = () => {
           element={
             <ProtectedRoute roles={['Patient']}>
               <MyAppointments />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/payment/result"
+          element={
+            <ProtectedRoute roles={['Patient']}>
+              <PaymentResult />
             </ProtectedRoute>
           }
         />

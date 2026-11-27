@@ -11,10 +11,11 @@ import prescriptionRoutes from './routes/prescriptionRoutes.js'
 import healthReportRoutes from './routes/healthReportRoutes.js'
 import accountRoutes from './routes/accountRoutes.js'
 import auditLogRoutes from './routes/auditLogRoutes.js'
+import paymentRoutes from './routes/paymentRoutes.js'
 
 const app = express()
 
-app.use(cors({
+const corsMiddleware = cors({
   origin(origin, callback) {
     const allowedOrigins = new Set([
       process.env.CLIENT_ORIGIN || 'http://localhost:5173',
@@ -28,7 +29,15 @@ app.use(cors({
     callback(new Error('Origin is not allowed by CORS'))
   },
   credentials: true,
-}))
+})
+
+app.use((req, res, next) => {
+  if (req.method === 'POST' && req.path.startsWith('/api/payments/sslcommerz/')) {
+    next()
+    return
+  }
+  corsMiddleware(req, res, next)
+})
 app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 app.use('/api/auth', authRoutes)
@@ -41,6 +50,7 @@ app.use('/api/prescriptions', prescriptionRoutes)
 app.use('/api/health-reports', healthReportRoutes)
 app.use('/api/accounts', accountRoutes)
 app.use('/api/audit-logs', auditLogRoutes)
+app.use('/api/payments', paymentRoutes)
 
 app.use((error, _req, res, _next) => {
   console.error('API request failed:', error.message)

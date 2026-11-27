@@ -6,6 +6,7 @@ import {
   fetchMyAppointments,
   rescheduleAppointment,
 } from '../services/appointmentApi'
+import { fetchMyPayments } from '../services/paymentApi'
 import './MyAppointments.css'
 
 const statusClass = (status) => status.toLowerCase()
@@ -19,6 +20,9 @@ const MyAppointments = () => {
   const [rescheduleDate, setRescheduleDate] = useState('')
   const [rescheduleTime, setRescheduleTime] = useState('')
   const [availableTimes, setAvailableTimes] = useState([])
+  const [payments, setPayments] = useState([])
+  const [paymentsLoading, setPaymentsLoading] = useState(true)
+  const [paymentsError, setPaymentsError] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -36,6 +40,28 @@ const MyAppointments = () => {
       .finally(() => {
         if (!controller.signal.aborted) {
           setLoading(false)
+        }
+      })
+
+    return () => controller.abort()
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    fetchMyPayments(controller.signal)
+      .then(setPayments)
+      .catch((requestError) => {
+        if (!controller.signal.aborted) {
+          setPaymentsError(
+            requestError.response?.data?.message ||
+            'Unable to load payment history.',
+          )
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setPaymentsLoading(false)
         }
       })
 
@@ -129,6 +155,51 @@ const MyAppointments = () => {
           {actionError}
         </p>
       )}
+
+      <section className="payment-history" aria-labelledby="payment-history-title">
+        <div className="payment-history-heading">
+          <div>
+            <span>SECURE TRANSACTIONS</span>
+            <h2 id="payment-history-title">Payment history</h2>
+          </div>
+        </div>
+        {paymentsLoading && (
+          <p className="payment-history-message" role="status">Loading payment history...</p>
+        )}
+        {paymentsError && (
+          <p className="payment-history-message payment-history-error" role="alert">
+            {paymentsError}
+          </p>
+        )}
+        {!paymentsLoading && !paymentsError && payments.length === 0 && (
+          <p className="payment-history-message">No payment transactions yet.</p>
+        )}
+        {payments.length > 0 && (
+          <div className="payment-history-list">
+            {payments.map((payment) => (
+              <article className="payment-history-item" key={payment._id}>
+                <div>
+                  <strong>
+                    {payment.method === 'card'
+                      ? `${payment.cardBrand === 'mastercard' ? 'Mastercard' : 'Visa'} card`
+                      : payment.method === 'bkash'
+                        ? 'bKash'
+                        : 'Nagad'}
+                  </strong>
+                  <span>{new Date(payment.createdAt).toLocaleString()}</span>
+                </div>
+                <div className="payment-history-reference">
+                  <span>Ref: {payment.merchantTransactionId}</span>
+                  <strong>৳{payment.amount} {payment.currency}</strong>
+                </div>
+                <span className={`payment-status-badge ${statusClass(payment.status)}`}>
+                  {payment.status}
+                </span>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
 
       {!loading && !error && appointments.length === 0 && (
         <div className="my-appointments-empty">

@@ -8,6 +8,7 @@ export const AUDIT_MODULES = [
   'admins',
   'doctors',
   'appointments',
+  'payments',
   'reviews',
   'prescriptions',
   'healthReports',
